@@ -1,7 +1,7 @@
 // © 2025 John Gary Pusey (see LICENSE.md)
 
-@testable import XestiABC
 import Testing
+@testable import XestiABC
 
 @Suite
 struct StringExtensionsTests {

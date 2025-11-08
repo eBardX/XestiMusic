@@ -112,6 +112,19 @@ extension MIDIChannelMessage {
 
     // MARK: Public Instance Properties
 
+    public var channel: MIDIChannel {
+        switch self {
+        case let .channelPressure(channel, _),
+            let .controlChange(channel, _, _),
+            let .noteOff(channel, _, _),
+            let .noteOn(channel, _, _),
+            let .pitchBendChange(channel, _),
+            let .polyphonicPressure(channel, _, _),
+            let .programChange(channel, _):
+            channel
+        }
+    }
+
     public var dataBytes: [UInt8]? {
         switch self {
         case let .channelPressure(_, velocity):
