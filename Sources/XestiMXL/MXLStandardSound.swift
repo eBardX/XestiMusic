@@ -1,27 +1,24 @@
 // © 2025 John Gary Pusey (see LICENSE.md)
 
-public struct MXLPart {
+public struct MXLStandardSound {
 
     // MARK: Public Initializers
 
-    public init(id: String,
-                content: Content) {
-        self.content = content
+    public init(id: String) {
         self.id = id
     }
 
     // MARK: Public Instance Properties
 
-    public let content: Content
     public let id: String
 }
 
 // MARK: - Codable
 
-extension MXLPart: Codable {
+extension MXLStandardSound: Codable {
 }
 
 // MARK: - Sendable
 
-extension MXLPart: Sendable {
+extension MXLStandardSound: Sendable {
 }

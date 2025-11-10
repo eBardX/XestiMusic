@@ -146,7 +146,7 @@ extension MusicDumper {
         var line = _format(event.eventTime,
                            division)
 
-        line += " • "
+        line += " ∙ "
 
         switch event {
         case let .meta(_, message):
@@ -168,14 +168,14 @@ extension MusicDumper {
         let tracks = sequence.tracks
         let trackCount = tracks.count
 
-        var header = "Sequence • Format "
+        var header = "Sequence ∙ Format "
 
         header += Formatter.format(format.uintValue)
-        header += " • "
+        header += " ∙ "
         header += Formatter.format(trackCount)
         header += " "
         header += trackCount != 1 ? "tracks" : "track"
-        header += " • "
+        header += " ∙ "
         header += _format(division)
 
         emit()
@@ -192,9 +192,10 @@ extension MusicDumper {
         let events = track.events
         let eventCount = events.count
 
-        var header = "Track #\(index + 1)"
+        var header = "Track #"
 
-        header += " • "
+        header += Formatter.format(index + 1)
+        header += " ∙ "
         header += Formatter.format(eventCount)
         header += " "
         header += eventCount != 1 ? "events" : "event"
@@ -252,7 +253,7 @@ extension MusicDumper {
 
     private func _format(_ eventTime: SMFEventTime,
                          _ timeCode: SMPTETimeCode) -> String {
-        "\(eventTime)"
+        "\(eventTime)"  // TODO
     }
 
     private func _format(_ frameRate: SMPTEFrameRate) -> String {
@@ -278,29 +279,29 @@ extension MusicDumper {
     private func _format(_ message: MIDIChannelMessage) -> String {
         var result = _format(message.channel)
 
-        result += " • "
+        result += " ∙ "
 
         switch message {
         case let .channelPressure(_, value):
-            result += "Channel pressure • "
+            result += "Channel pressure ∙ "
             result += _format(value)
 
         case let .controlChange(_, controller, value):
-            result += "Control change • "
+            result += "Control change ∙ "
             result += _format(controller)
-            result += " • "
+            result += " ∙ "
             result += _format(value)
 
         case let .noteOff(_, key, velocity):
-            result += "Note off • "
+            result += "Note off ∙ "
             result += _format(key)
-            result += " • "
+            result += " ∙ "
             result += _format(velocity)
 
         case let .noteOn(_, key, velocity):
-            result += "Note on • "
+            result += "Note on ∙ "
             result += _format(key)
-            result += " • "
+            result += " ∙ "
             result += _format(velocity)
 
             if velocity == 0 {
@@ -308,17 +309,17 @@ extension MusicDumper {
             }
 
         case let .pitchBendChange(_, change):
-            result += "Pitch bend change • "
+            result += "Pitch bend change ∙ "
             result += _format(change)
 
         case let .polyphonicPressure(_, key, value):
-            result += "Polyphonic pressure • "
+            result += "Polyphonic pressure ∙ "
             result += _format(key)
-            result += " • "
+            result += " ∙ "
             result += _format(value)
 
         case let .programChange(_, program):
-            result += "Program change • "
+            result += "Program change ∙ "
             result += _format(program)
         }
 
@@ -330,74 +331,74 @@ extension MusicDumper {
 
         switch message {
         case let .copyright(text):
-            result += "Copyright • "
+            result += "Copyright ∙ "
             result += _format(text)
 
         case let .cuePoint(text):
-            result += "Cue point • "
+            result += "Cue point ∙ "
             result += _format(text)
 
         case let .deviceName(text):
-            result += "Device name • "
+            result += "Device name ∙ "
             result += _format(text)
 
         case .endOfTrack:
             result += "End of track"
 
         case let .instrumentName(text):
-            result += "Instrument name • "
+            result += "Instrument name ∙ "
             result += _format(text)
 
         case let .keySignature(keySignature):
-            result += "Key signature • "
+            result += "Key signature ∙ "
             result += _format(keySignature)
 
         case let .lyric(text):
-            result += "Lyric • "
+            result += "Lyric ∙ "
             result += _format(text)
 
         case let .marker(text):
-            result += "Marker • "
+            result += "Marker ∙ "
             result += _format(text)
 
         case let .midiChannelPrefix(channel):
-            result += "MIDI channel prefix • "
+            result += "MIDI channel prefix ∙ "
             result += _format(channel)
 
         case let .midiPort(port):
-            result += "MIDI port • "
+            result += "MIDI port ∙ "
             result += _format(port)
 
         case let .programName(text):
-            result += "Program name • "
+            result += "Program name ∙ "
             result += _format(text)
 
         case let .sequenceNumber(seqNum):
-            result += "Sequence number • "
+            result += "Sequence number ∙ "
             result += _format(seqNum)
 
         case let .sequencerSpecific(bytes):
-            result += "Sequencer-specific • "
+            result += "Sequencer-specific ∙ "
             result += _format(bytes)
 
         case let .sequenceTrackName(text):
-            result += "Sequence/track name • "
+            result += "Sequence/track name ∙ "
             result += _format(text)
 
         case let .smpteOffset(time):
-            result += "SMPTE offset • "
+            result += "SMPTE offset ∙ "
             result += _format(time)
 
         case let .tempo(tempo):
-            result += "Tempo • "
+            result += "Tempo ∙ "
             result += _format(tempo)
 
         case let .text(text):
-            result += "Text • "
+            result += "Text ∙ "
             result += _format(text)
 
         case let .timeSignature(timeSignature):
-            result += "Time signature • "
+            result += "Time signature ∙ "
             result += _format(timeSignature)
         }
 
@@ -405,7 +406,19 @@ extension MusicDumper {
     }
 
     private func _format(_ message: SMFSysExMessage) -> String {
-        "\(message)"
+        var result = ""
+
+        switch message {
+        case let .escape(bytes):
+            result += "Escape ∙ "
+            result += _format(bytes)
+
+        case let .systemExclusive(bytes):
+            result += "System exclusive ∙ "
+            result += _format(bytes)
+        }
+
+        return result
     }
 
     private func _format(_ pitchBend: MIDIPitchBend) -> String {
@@ -421,7 +434,7 @@ extension MusicDumper {
     }
 
     private func _format(_ text: SMFText) -> String {
-        "“" + text.stringValue + "”"
+        Formatter.format(text.stringValue)
     }
 
     private func _format(_ tickRate: SMFTickRate) -> String {
@@ -439,7 +452,7 @@ extension MusicDumper {
     private func _format(_ time: SMPTETime) -> String {
         var result = _format(time.frameRate)
 
-        result += " • "
+        result += " ∙ "
         result += String(format: "%02d:%02d:%02d %02d.%02d",
                          time.hour,
                          time.minute,
@@ -453,7 +466,7 @@ extension MusicDumper {
     private func _format(_ timeCode: SMPTETimeCode) -> String {
         var result = _format(timeCode.frameRate)
 
-        result += " • "
+        result += " ∙ "
         result += Formatter.format(timeCode.tickRate)
         result += timeCode.tickRate != 1 ? "ticks" : "tick"
         result += "/frame"
@@ -466,12 +479,12 @@ extension MusicDumper {
 
         result += "/"
         result += Formatter.format(1 << timeSignature.denominator)
-        result += " • "
+        result += " ∙ "
         result += Formatter.format(timeSignature.clockRate)
         result += " "
         result += timeSignature.clockRate != 1 ? "clocks" : "clock"
         result += "/click"
-        result += " • "
+        result += " ∙ "
         result += Formatter.format(timeSignature.beatRate)
         result += " "
         result += timeSignature.beatRate != 1 ? "32nd-notes" : "32nd-note"

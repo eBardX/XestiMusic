@@ -1,6 +1,6 @@
 // © 2025 John Gary Pusey (see LICENSE.md)
 
-public struct MXLScore {
+public struct MXLScorePartwise {
 
     // MARK: Public Initializers
 
@@ -8,29 +8,29 @@ public struct MXLScore {
                 movementNumber: String?,
                 movementTitle: String?,
                 partList: MXLPartList,
-                content: Content) {
-        self.content = content
+                parts: [MXLPartPartwise]) {
         self.movementNumber = movementNumber
         self.movementTitle = movementTitle
         self.partList = partList
+        self.parts = parts
         self.work = work
     }
 
     // MARK: Public Instance Properties
 
-    public let content: Content
     public let movementNumber: String?
     public let movementTitle: String?
     public let partList: MXLPartList
+    public let parts: [MXLPartPartwise]
     public let work: MXLWork?
 }
 
 // MARK: - Codable
 
-extension MXLScore: Codable {
+extension MXLScorePartwise: Codable {
 }
 
 // MARK: - Sendable
 
-extension MXLScore: Sendable {
+extension MXLScorePartwise: Sendable {
 }

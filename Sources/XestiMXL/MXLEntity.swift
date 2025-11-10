@@ -3,9 +3,9 @@
 public enum MXLEntity {
     case container(MXLContainer)
     case opus(MXLOpus)
-    case scorePartwise(MXLScore) // MXLScorePartwise ???
-    case scoreTimewise(MXLScore) // MXLScoreTimewise ???
-    case sounds([MXLSound])      // MXLStandardSound ???
+    case scorePartwise(MXLScorePartwise)
+    case scoreTimewise(MXLScoreTimewise)
+    case sounds([MXLStandardSound])
 }
 
 // MARK: - Codable

@@ -19,19 +19,16 @@ public struct MusicDumper {
             try dumpABC(fileURL)
 
         case "dkm", "johnnysonic":
-            try dumpDKM(fileURL)
+            try dumpJohnnySonic(fileURL)
 
         case "gmn":
-            try dumpGMN(fileURL)
+            try dumpGuido(fileURL)
 
         case "mid", "midi", "smf":
             try dumpMIDI(fileURL)
 
-        case "musicxml", "xml":
+        case "musicxml", "mxl", "xml":
             try dumpMusicXML(fileURL)
-
-        case "mxl":
-            try dumpMXL(fileURL)
 
         default:
             emitError("Unrecognized file format: “\(fileURL.path)”")
@@ -48,26 +45,6 @@ public struct MusicDumper {
 extension MusicDumper {
 
     // MARK: Internal Instance Methods
-
-    internal func dumpABC(_ fileURL: URL) throws {
-        emit("Dump of ABC File “\(fileURL.path)”")
-    }
-
-    internal func dumpDKM(_ fileURL: URL) throws {
-        emit("Dump of JohnnySonic Score File “\(fileURL.path)”")
-    }
-
-    internal func dumpGMN(_ fileURL: URL) throws {
-        emit("Dump of Guido Score File “\(fileURL.path)”")
-    }
-
-    internal func dumpMXL(_ fileURL: URL) throws {
-        emit("Dump of Compressed MusicXML Document “\(fileURL.path)”")
-    }
-
-    internal func dumpMusicXML(_ fileURL: URL) throws {
-        emit("Dump of MusicXML Document “\(fileURL.path)”")
-    }
 
     internal func emit(_ line: String = "") {
         stdio.writeOutput(line)
