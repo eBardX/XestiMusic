@@ -1,5 +1,5 @@
 {
-  "originHash" : "c078e2b9a099eaa03ca2d8c3e1f0e786210d6d9f5c2fab2fc2a5b1f145593997",
+  "originHash" : "22e32a6fd238cdc2204588ca2c08d8882634612ee0d81fc07312c2d5741dcade",
   "pins" : [
     {
       "identity" : "swift-argument-parser",
@@ -25,7 +25,7 @@
       "location" : "https://github.com/eBardX/XestiTools.git",
       "state" : {
         "branch" : "swift-6.2-support",
-        "revision" : "324446c69049ec42341180f24ad7b0934a095738"
+        "revision" : "0e93395c9d895fb557c6c56c6162842226226897"
       }
     },
     {

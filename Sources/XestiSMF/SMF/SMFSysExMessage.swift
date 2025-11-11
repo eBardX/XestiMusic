@@ -46,11 +46,6 @@ extension SMFSysExMessage {
     }
 }
 
-// MARK: - Codable
-
-extension SMFSysExMessage: Codable {
-}
-
 // MARK: - Sendable
 
 extension SMFSysExMessage: Sendable {

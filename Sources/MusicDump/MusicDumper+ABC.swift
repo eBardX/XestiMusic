@@ -9,8 +9,12 @@ extension MusicDumper {
     // MARK: Internal Instance Methods
 
     internal func dumpABC(_ fileURL: URL) throws {
+        var banner = "Dump of ABC File "
+
+        banner += format(fileURL.path)
+
         emit()
-        emit("Dump of ABC File “\(fileURL.path)”")
+        emit(banner)
 
         var parser = try ABCParser(readFile(fileURL))
 

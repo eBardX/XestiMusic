@@ -16,11 +16,6 @@ public struct MXLRootFile {
     public let mediaType: String?
 }
 
-// MARK: - Codable
-
-extension MXLRootFile: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLRootFile: Sendable {

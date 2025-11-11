@@ -13,11 +13,6 @@ public struct DKMScore {
     public let entries: [DKMEntry]
 }
 
-// MARK: - Codable
-
-extension DKMScore: Codable {
-}
-
 // MARK: - Sendable
 
 extension DKMScore: Sendable {

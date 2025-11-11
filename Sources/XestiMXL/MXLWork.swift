@@ -16,11 +16,6 @@ public struct MXLWork {
     public let workTitle: String?
 }
 
-// MARK: - Codable
-
-extension MXLWork: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLWork: Sendable {

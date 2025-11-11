@@ -25,11 +25,6 @@ public struct MXLScoreTimewise {
     public let work: MXLWork?
 }
 
-// MARK: - Codable
-
-extension MXLScoreTimewise: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLScoreTimewise: Sendable {

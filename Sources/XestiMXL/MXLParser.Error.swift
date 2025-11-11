@@ -4,6 +4,8 @@ import XestiTools
 
 extension MXLParser {
     public enum Error {
+        case invalidRootFileMediaType(String)
+        case noRootFileFound
         case parseFailure((any EnhancedError)?)
     }
 }
@@ -19,11 +21,20 @@ extension MXLParser.Error: EnhancedError {
         switch self {
         case let .parseFailure(error):
             error
+
+        default:
+            nil
         }
     }
 
     public var message: String {
         switch self {
+        case let .invalidRootFileMediaType(mediaType):
+            "Invalid root file media type: \(mediaType)"
+
+        case .noRootFileFound:
+            "No root files found in container"
+
         case .parseFailure:
             "Unable to parse MusicXML file"
         }

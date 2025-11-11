@@ -53,11 +53,6 @@ extension MXLTie {
     }
 }
 
-// MARK: - Codable
-
-extension MXLTie: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLTie: Sendable {

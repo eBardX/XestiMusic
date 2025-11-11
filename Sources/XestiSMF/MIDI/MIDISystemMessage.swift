@@ -216,11 +216,6 @@ extension MIDISystemMessage {
     }
 }
 
-// MARK: - Codable
-
-extension MIDISystemMessage: Codable {
-}
-
 // MARK: - Sendable
 
 extension MIDISystemMessage: Sendable {

@@ -8,11 +8,6 @@ extension MXLOpus {
     }
 }
 
-// MARK: - Codable
-
-extension MXLOpus.Item: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLOpus.Item: Sendable {

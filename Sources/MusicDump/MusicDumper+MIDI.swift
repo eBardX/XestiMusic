@@ -9,8 +9,12 @@ extension MusicDumper {
     // MARK: Internal Instance Methods
 
     internal func dumpMIDI(_ fileURL: URL) throws {
+        var banner = "Dump of Standard MIDI File "
+
+        banner += format(fileURL.path)
+
         emit()
-        emit("Dump of Standard MIDI File “\(fileURL.path)”")
+        emit(banner)
 
         var parser = try SMFParser(readFile(fileURL))
 
@@ -146,7 +150,7 @@ extension MusicDumper {
         var line = _format(event.eventTime,
                            division)
 
-        line += " ∙ "
+        line += spacer()
 
         switch event {
         case let .meta(_, message):
@@ -164,18 +168,17 @@ extension MusicDumper {
 
     private func _dump(_ sequence: SMFSequence) {
         let division = sequence.division
-        let format = sequence.format
+        let sformat = sequence.format
         let tracks = sequence.tracks
-        let trackCount = tracks.count
 
-        var header = "Sequence ∙ Format "
+        var header = "Sequence"
 
-        header += Formatter.format(format.uintValue)
-        header += " ∙ "
-        header += Formatter.format(trackCount)
-        header += " "
-        header += trackCount != 1 ? "tracks" : "track"
-        header += " ∙ "
+        header += spacer()
+        header += "Format "
+        header += format(sformat.uintValue)
+        header += spacer()
+        header += format(tracks.count, "track")
+        header += spacer()
         header += _format(division)
 
         emit()
@@ -190,15 +193,12 @@ extension MusicDumper {
                        _ index: Int,
                        _ division: SMFDivision) {
         let events = track.events
-        let eventCount = events.count
 
         var header = "Track #"
 
-        header += Formatter.format(index + 1)
-        header += " ∙ "
-        header += Formatter.format(eventCount)
-        header += " "
-        header += eventCount != 1 ? "events" : "event"
+        header += format(index + 1)
+        header += spacer()
+        header += format(events.count, "event")
 
         emit()
         emit(4, header)
@@ -217,11 +217,20 @@ extension MusicDumper {
     }
 
     private func _format(_ channel: MIDIChannel) -> String {
-        Formatter.format(channel.uintValue)
+        format(channel.uintValue)
     }
 
     private func _format(_ controller: MIDIController) -> String {
-        Self.controllerNames[controller.uintValue] ?? "Undefined (\(controller.uintValue))"
+        if let name = Self.controllerNames[controller.uintValue] {
+            return name
+        }
+
+        var result = "Control change"
+
+        result += spacer()
+        result += format(controller.uintValue)
+
+        return result
     }
 
     private func _format(_ division: SMFDivision) -> String {
@@ -247,8 +256,8 @@ extension MusicDumper {
 
     private func _format(_ eventTime: SMFEventTime,
                          _ tickRate: SMFTickRate) -> String {
-        Formatter.format(Double(eventTime.uintValue) / Double(tickRate.uintValue),
-                         trimTrailingZeros: false)
+        format(Double(eventTime.uintValue) / Double(tickRate.uintValue),
+               precision: 3...3)
     }
 
     private func _format(_ eventTime: SMFEventTime,
@@ -279,29 +288,31 @@ extension MusicDumper {
     private func _format(_ message: MIDIChannelMessage) -> String {
         var result = _format(message.channel)
 
-        result += " ∙ "
+        result += spacer()
 
         switch message {
         case let .channelPressure(_, value):
-            result += "Channel pressure ∙ "
+            result += "Channel pressure"
+            result += spacer()
             result += _format(value)
 
         case let .controlChange(_, controller, value):
-            result += "Control change ∙ "
             result += _format(controller)
-            result += " ∙ "
+            result += spacer()
             result += _format(value)
 
         case let .noteOff(_, key, velocity):
-            result += "Note off ∙ "
+            result += "Note off"
+            result += spacer()
             result += _format(key)
-            result += " ∙ "
+            result += spacer()
             result += _format(velocity)
 
         case let .noteOn(_, key, velocity):
-            result += "Note on ∙ "
+            result += "Note on"
+            result += spacer()
             result += _format(key)
-            result += " ∙ "
+            result += spacer()
             result += _format(velocity)
 
             if velocity == 0 {
@@ -309,17 +320,20 @@ extension MusicDumper {
             }
 
         case let .pitchBendChange(_, change):
-            result += "Pitch bend change ∙ "
+            result += "Pitch bend change"
+            result += spacer()
             result += _format(change)
 
         case let .polyphonicPressure(_, key, value):
-            result += "Polyphonic pressure ∙ "
+            result += "Polyphonic pressure"
+            result += spacer()
             result += _format(key)
-            result += " ∙ "
+            result += spacer()
             result += _format(value)
 
         case let .programChange(_, program):
-            result += "Program change ∙ "
+            result += "Program change"
+            result += spacer()
             result += _format(program)
         }
 
@@ -331,74 +345,91 @@ extension MusicDumper {
 
         switch message {
         case let .copyright(text):
-            result += "Copyright ∙ "
+            result += "Copyright"
+            result += spacer()
             result += _format(text)
 
         case let .cuePoint(text):
-            result += "Cue point ∙ "
+            result += "Cue point"
+            result += spacer()
             result += _format(text)
 
         case let .deviceName(text):
-            result += "Device name ∙ "
+            result += "Device name"
+            result += spacer()
             result += _format(text)
 
         case .endOfTrack:
             result += "End of track"
 
         case let .instrumentName(text):
-            result += "Instrument name ∙ "
+            result += "Instrument name"
+            result += spacer()
             result += _format(text)
 
         case let .keySignature(keySignature):
-            result += "Key signature ∙ "
+            result += "Key signature"
+            result += spacer()
             result += _format(keySignature)
 
         case let .lyric(text):
-            result += "Lyric ∙ "
+            result += "Lyric"
+            result += spacer()
             result += _format(text)
 
         case let .marker(text):
-            result += "Marker ∙ "
+            result += "Marker"
+            result += spacer()
             result += _format(text)
 
         case let .midiChannelPrefix(channel):
-            result += "MIDI channel prefix ∙ "
+            result += "MIDI channel prefix"
+            result += spacer()
             result += _format(channel)
 
         case let .midiPort(port):
-            result += "MIDI port ∙ "
+            result += "MIDI port"
+            result += spacer()
             result += _format(port)
 
         case let .programName(text):
-            result += "Program name ∙ "
+            result += "Program name"
+            result += spacer()
             result += _format(text)
 
         case let .sequenceNumber(seqNum):
-            result += "Sequence number ∙ "
+            result += "Sequence number"
+            result += spacer()
             result += _format(seqNum)
 
         case let .sequencerSpecific(bytes):
-            result += "Sequencer-specific ∙ "
+            result += "Sequencer-specific"
+            result += spacer()
             result += _format(bytes)
 
         case let .sequenceTrackName(text):
-            result += "Sequence/track name ∙ "
+            result += "Sequence/track name"
+            result += spacer()
             result += _format(text)
 
         case let .smpteOffset(time):
-            result += "SMPTE offset ∙ "
+            result += "SMPTE offset"
+            result += spacer()
             result += _format(time)
 
         case let .tempo(tempo):
-            result += "Tempo ∙ "
+            result += "Tempo"
+            result += spacer()
             result += _format(tempo)
 
         case let .text(text):
-            result += "Text ∙ "
+            result += "Text"
+            result += spacer()
             result += _format(text)
 
         case let .timeSignature(timeSignature):
-            result += "Time signature ∙ "
+            result += "Time signature"
+            result += spacer()
             result += _format(timeSignature)
         }
 
@@ -410,11 +441,13 @@ extension MusicDumper {
 
         switch message {
         case let .escape(bytes):
-            result += "Escape ∙ "
+            result += "Escape"
+            result += spacer()
             result += _format(bytes)
 
         case let .systemExclusive(bytes):
-            result += "System exclusive ∙ "
+            result += "System exclusive"
+            result += spacer()
             result += _format(bytes)
         }
 
@@ -422,11 +455,11 @@ extension MusicDumper {
     }
 
     private func _format(_ pitchBend: MIDIPitchBend) -> String {
-        Formatter.format(pitchBend.intValue)
+        format(pitchBend.intValue)
     }
 
     private func _format(_ tempo: SMFTempo) -> String {
-        var result = Formatter.format(tempo.uintValue)
+        var result = format(tempo.uintValue)
 
         result += "µs/quarter-note"
 
@@ -434,16 +467,14 @@ extension MusicDumper {
     }
 
     private func _format(_ text: SMFText) -> String {
-        Formatter.format(text.stringValue)
+        format(text.stringValue)
     }
 
     private func _format(_ tickRate: SMFTickRate) -> String {
         let rawTickRate = tickRate.uintValue
 
-        var result = Formatter.format(rawTickRate)
+        var result = format(rawTickRate, "tick")
 
-        result += " "
-        result += rawTickRate != 1 ? "ticks" : "tick"
         result += "/quarter-note"
 
         return result
@@ -452,7 +483,7 @@ extension MusicDumper {
     private func _format(_ time: SMPTETime) -> String {
         var result = _format(time.frameRate)
 
-        result += " ∙ "
+        result += spacer()
         result += String(format: "%02d:%02d:%02d %02d.%02d",
                          time.hour,
                          time.minute,
@@ -466,42 +497,37 @@ extension MusicDumper {
     private func _format(_ timeCode: SMPTETimeCode) -> String {
         var result = _format(timeCode.frameRate)
 
-        result += " ∙ "
-        result += Formatter.format(timeCode.tickRate)
-        result += timeCode.tickRate != 1 ? "ticks" : "tick"
+        result += spacer()
+        result += format(timeCode.tickRate, "tick")
         result += "/frame"
 
         return result
     }
 
     private func _format(_ timeSignature: SMFTimeSignature) -> String {
-        var result = Formatter.format(timeSignature.numerator)
+        var result = format(timeSignature.numerator)
 
         result += "/"
-        result += Formatter.format(1 << timeSignature.denominator)
-        result += " ∙ "
-        result += Formatter.format(timeSignature.clockRate)
-        result += " "
-        result += timeSignature.clockRate != 1 ? "clocks" : "clock"
+        result += format(1 << timeSignature.denominator)
+        result += spacer()
+        result += format(timeSignature.clockRate, "clock")
         result += "/click"
-        result += " ∙ "
-        result += Formatter.format(timeSignature.beatRate)
-        result += " "
-        result += timeSignature.beatRate != 1 ? "32nd-notes" : "32nd-note"
+        result += spacer()
+        result += format(timeSignature.beatRate, "32nd-note")
         result += "/quarter-note"
 
         return result
     }
 
     private func _format(_ value: MIDIData1Value) -> String {
-        Formatter.format(value.uintValue)
+        format(value.uintValue)
     }
 
     private func _format(_ value: MIDIData2Value) -> String {
-        Formatter.format(value.uintValue)
+        format(value.uintValue)
     }
 
     private func _format(_ value: SMFData2Value) -> String {
-        Formatter.format(value.uintValue)
+        format(value.uintValue)
     }
 }

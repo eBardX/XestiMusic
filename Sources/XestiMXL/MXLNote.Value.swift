@@ -8,11 +8,6 @@ extension MXLNote {
     }
 }
 
-// MARK: - Codable
-
-extension MXLNote.Value: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLNote.Value: Sendable {

@@ -29,11 +29,6 @@ public enum DKMCommand: String {
     case vocode          = "Vocode"
 }
 
-// MARK: - Codable
-
-extension DKMCommand: Codable {
-}
-
 // MARK: - Sendable
 
 extension DKMCommand: Sendable {

@@ -171,11 +171,6 @@ public enum MXLAttribute: String {    // make StringRepresentable instead ???
     case xmlSpace           = "xml:space"
 }
 
-// MARK: - Codable
-
-extension MXLAttribute: Codable {
-}
-
 // MARK: - XML.Attribute
 
 extension MXLAttribute: XMLAttribute {

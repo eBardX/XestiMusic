@@ -16,11 +16,6 @@ public struct MXLPartTimewise {
     public let items: [MXLMusicItem]
 }
 
-// MARK: - Codable
-
-extension MXLPartTimewise: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLPartTimewise: Sendable {

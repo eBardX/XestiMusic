@@ -13,11 +13,6 @@ public struct MXLContainer {
     public let rootFiles: [MXLRootFile]
 }
 
-// MARK: - Codable
-
-extension MXLContainer: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLContainer: Sendable {

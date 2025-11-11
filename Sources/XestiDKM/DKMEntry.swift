@@ -16,11 +16,6 @@ public struct DKMEntry {
     public let arguments: [DKMArgument]
 }
 
-// MARK: - Codable
-
-extension DKMEntry: Codable {
-}
-
 // MARK: - Sendable
 
 extension DKMEntry: Sendable {

@@ -458,11 +458,6 @@ public enum MXLElement: String {  // make StringRepresentable instead ???
     case workTitle                = "work-title"
 }
 
-// MARK: - Codable
-
-extension MXLElement: Codable {
-}
-
 // MARK: - XML.Element
 
 extension MXLElement: XMLElement {

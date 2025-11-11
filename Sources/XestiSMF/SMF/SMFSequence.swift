@@ -19,11 +19,6 @@ public struct SMFSequence {
     public let tracks: [SMFTrack]
 }
 
-// MARK: - Codable
-
-extension SMFSequence: Codable {
-}
-
 // MARK: - Sendable
 
 extension SMFSequence: Sendable {

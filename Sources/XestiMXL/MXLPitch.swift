@@ -19,11 +19,6 @@ public struct MXLPitch {
     public let step: String
 }
 
-// MARK: - Codable
-
-extension MXLPitch: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLPitch: Sendable {

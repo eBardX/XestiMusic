@@ -16,11 +16,6 @@ public struct MXLMeasurePartwise {
     public let number: String
 }
 
-// MARK: - Codable
-
-extension MXLMeasurePartwise: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLMeasurePartwise: Sendable {

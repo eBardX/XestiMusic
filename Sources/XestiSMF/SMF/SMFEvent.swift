@@ -22,11 +22,6 @@ extension SMFEvent {
     }
 }
 
-// MARK: - Codable
-
-extension SMFEvent: Codable {
-}
-
 // MARK: - Sendable
 
 extension SMFEvent: Sendable {

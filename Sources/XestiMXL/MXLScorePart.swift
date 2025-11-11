@@ -16,11 +16,6 @@ public struct MXLScorePart {
     public let partName: String
 }
 
-// MARK: - Codable
-
-extension MXLScorePart: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLScorePart: Sendable {

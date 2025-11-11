@@ -41,11 +41,6 @@ extension SMFDivision: BytesValueConvertible {
     }
 }
 
-// MARK: - Codable
-
-extension SMFDivision: Codable {
-}
-
 // MARK: - Sendable
 
 extension SMFDivision: Sendable {

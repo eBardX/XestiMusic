@@ -244,11 +244,6 @@ extension SMFMetaMessage {
     }
 }
 
-// MARK: - Codable
-
-extension SMFMetaMessage: Codable {
-}
-
 // MARK: - Sendable
 
 extension SMFMetaMessage: Sendable {

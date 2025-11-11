@@ -57,11 +57,6 @@ extension SMFTimeSignature: BytesValueConvertible {
     }
 }
 
-// MARK: - Codable
-
-extension SMFTimeSignature: Codable {
-}
-
 // MARK: - Sendable
 
 extension SMFTimeSignature: Sendable {

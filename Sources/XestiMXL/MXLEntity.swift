@@ -8,11 +8,6 @@ public enum MXLEntity {
     case sounds([MXLStandardSound])
 }
 
-// MARK: - Codable
-
-extension MXLEntity: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLEntity: Sendable {

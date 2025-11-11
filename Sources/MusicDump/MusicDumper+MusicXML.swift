@@ -9,15 +9,34 @@ extension MusicDumper {
     // MARK: Internal Instance Methods
 
     internal func dumpMusicXML(_ fileURL: URL) throws {
-        emit()
-        emit("Dump of MusicXML Document “\(fileURL.path)”")
+        let compressed = fileURL.pathExtension == "mxl"
 
-        if fileURL.pathExtension != "mxl" {
+        var banner = "Dump of "
+
+        if compressed {
+            banner += "Compressed "
+        }
+
+        banner += "MusicXML Document "
+        banner += format(fileURL.path)
+
+        emit()
+        emit(banner)
+
+        if compressed {
+            let file = try unzipArchive(fileURL)
+            let conFile = try file.findFile("META-INF/container.xml")
+            let data = try conFile.contentsOfRegularFile()
+            let entity = try MXLParser(data).parse()
+
+            guard case let .container(container) = entity
+            else { throw MXLParser.Error.parseFailure(nil) }
+
+            try _dump(container, file)
+        } else {
             let entity = try MXLParser(readFile(fileURL)).parse()
 
             _dump(entity)
-        } else {
-            fatalError("Not yet implemented")
         }
 
         emit()
@@ -25,12 +44,41 @@ extension MusicDumper {
 
     // MARK: Private Type Properties
 
+    private static let mediaTypes = ["application/musicxml+xml",
+                                     "application/vnd.recordare.musicxml+xml"]
+
     // MARK: Private Instance Methods
+
+    private func _dump(_ container: MXLContainer,
+                       _ file: FileWrapper) throws {
+        guard let rootFile = container.rootFiles.first
+        else { throw MXLParser.Error.noRootFileFound }
+
+        if let mediaType = rootFile.mediaType {
+            guard Self.mediaTypes.contains(mediaType)
+            else { throw MXLParser.Error.invalidRootFileMediaType(mediaType) }
+        }
+
+        emit()
+        emit(2, _format(rootFile))
+
+        let realFile = try file.findFile([rootFile.fullPath])
+        let data = try realFile.contentsOfRegularFile()
+        let entity = try MXLParser(data).parse()
+
+        _dump(entity)
+    }
 
     private func _dump(_ entity: MXLEntity) {
         switch entity {
+            // case let .opus(opus):
+            //     _dump(opus)
+
         case let .scorePartwise(score):
             _dump(score)
+
+            // case let .scoreTimewise(score):
+            //     _dump(score)
 
         default:
             fatalError("Not yet implemented")
@@ -42,31 +90,35 @@ extension MusicDumper {
 
         switch item {
         case let .attributes(divisions):
-            line += "Divisions ∙ "
+            line += "Divisions"
+            line += spacer()
 
             if let divisions {
-                line += Formatter.format(divisions)
+                line += format(divisions)
             } else {
                 line += "Unknown"
             }
 
         case let .backup(duration):
-            line += "Backup ∙ "
-            line += Formatter.format(duration)
+            line += "Backup"
+            line += spacer()
+            line += format(duration)
 
         case let .forward(duration):
-            line += "Forward ∙ "
-            line += Formatter.format(duration)
+            line += "Forward"
+            line += spacer()
+            line += format(duration)
 
         case let .note(note):
             line += _format(note)
 
         case let .sound(tempo):
-            line += "Tempo ∙ "
+            line += "Tempo"
+            line += spacer()
 
             if let tempo {
-                line += Formatter.format(Int(tempo))
-                line += "bpm"
+                line += format(Int(tempo))
+                line += " bpm"
             } else {
                 line += "Unknown"
             }
@@ -77,16 +129,13 @@ extension MusicDumper {
 
     private func _dump(_ measure: MXLMeasurePartwise) {
         let items = measure.items
-        let itemCount = items.count
 
         var header = "Measure "
 
-        header += Formatter.format(measure.number,
-                                   quoteAndEscape: false)
-        header += " ∙ "
-        header += Formatter.format(itemCount)
-        header += " "
-        header += itemCount != 1 ? "items" : "item"
+        header += format(measure.number,
+                         quoteAndEscape: false)
+        header += spacer()
+        header += format(items.count, "item")
 
         emit()
         emit(6, header)
@@ -105,13 +154,13 @@ extension MusicDumper {
         var line = "Movement"
 
         if let movementNumber {
-            line += " ∙ "
-            line += Formatter.format(movementNumber)
+            line += spacer()
+            line += format(movementNumber)
         }
 
         if let movementTitle {
-            line += " ∙ "
-            line += Formatter.format(movementTitle)
+            line += spacer()
+            line += format(movementTitle)
         }
 
         emit()
@@ -119,38 +168,35 @@ extension MusicDumper {
     }
 
     private func _dump(_ partList: MXLPartList) {
-        let partCount = partList.scoreParts.count
+        let scoreParts = partList.scoreParts
 
-        var header = "Part-list ∙ "
+        var header = "Part-list"
 
-        header += Formatter.format(partCount)
-        header += " "
-        header += partCount != 1 ? "score-parts" : "score-part"
+        header += spacer()
+        header += format(scoreParts.count, "score-part")
 
         emit()
         emit(4, header)
         emit()
 
-        for scorePart in partList.scoreParts {
+        for scorePart in scoreParts {
             _dump(scorePart)
         }
     }
 
     private func _dump(_ part: MXLPartPartwise) {
-        let measureCount = part.measures.count
+        let measures = part.measures
 
         var header = "Part "
 
-        header += Formatter.format(part.id)
-        header += " ∙ "
-        header += Formatter.format(measureCount)
-        header += " "
-        header += measureCount != 1 ? "measures" : "measure"
+        header += format(part.id)
+        header += spacer()
+        header += format(measures.count, "measure")
 
         emit()
         emit(4, header)
 
-        for measure in part.measures {
+        for measure in measures {
             _dump(measure)
         }
     }
@@ -158,21 +204,22 @@ extension MusicDumper {
     private func _dump(_ scorePart: MXLScorePart) {
         var line = "Score-part "
 
-        line += Formatter.format(scorePart.id)
-        line += " ∙ "
-        line += Formatter.format(scorePart.partName)
+        line += format(scorePart.id)
+        line += spacer()
+        line += format(scorePart.partName)
 
         emit(6, line)
     }
 
     private func _dump(_ score: MXLScorePartwise) {
-        let partCount = score.parts.count
+        let parts = score.parts
 
-        var header = "Score ∙ Partwise ∙ "
+        var header = "Score"
 
-        header += Formatter.format(partCount)
-        header += " "
-        header += partCount != 1 ? "parts" : "part"
+        header += spacer()
+        header += "Partwise"
+        header += spacer()
+        header += format(parts.count, "part")
 
         emit()
         emit(2, header)
@@ -186,7 +233,7 @@ extension MusicDumper {
 
         _dump(score.partList)
 
-        for part in score.parts {
+        for part in parts {
             _dump(part)
         }
     }
@@ -195,13 +242,13 @@ extension MusicDumper {
         var line = "Work"
 
         if let workNumber = work.workNumber {
-            line += " ∙ "
-            line += Formatter.format(workNumber)
+            line += spacer()
+            line += format(workNumber)
         }
 
         if let workTitle = work.workTitle {
-            line += " ∙ "
-            line += Formatter.format(workTitle)
+            line += spacer()
+            line += format(workTitle)
         }
 
         emit()
@@ -233,16 +280,17 @@ extension MusicDumper {
     private func _format(_ note: MXLNote) -> String {
         var line = ""
 
+        line += _format(note.value)
+        line += spacer()
+        line += format(note.duration)
+
         if let chord = note.chord, chord {
-            line += "Chord ∙ "
+            line += spacer()
+            line += "Chord"
         }
 
-        line += _format(note.value)
-        line += " ∙ "
-        line += Formatter.format(note.duration)
-
         if let result = _format(note.tie) {
-            line += " ∙ "
+            line += spacer()
             line += result
         }
 
@@ -256,14 +304,29 @@ extension MusicDumper {
             result += alter
         }
 
-        result += Formatter.format(pitch.octave)
+        result += format(pitch.octave)
 
         return result
     }
 
+    private func _format(_ rootFile: MXLRootFile) -> String {
+        var line = "Root file"
+
+        line += spacer()
+        line += format(rootFile.fullPath)
+
+        if let mediaType = rootFile.mediaType {
+            line += " ["
+            line += format(mediaType,
+                           quoteAndEscape: false)
+            line += "]"
+        }
+
+        return line
+    }
+
     private func _format(_ tie: MXLTie) -> String? {
         switch tie {
-
         case .neither:
             nil
 
@@ -281,7 +344,7 @@ extension MusicDumper {
     private func _format(_ value: MXLNote.Value) -> String {
         switch value {
         case let .pitch(pitch):
-            "Pitch ∙ " + _format(pitch)
+            "Pitch" + spacer() + _format(pitch)
 
         case .rest:
             "Rest"

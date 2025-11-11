@@ -8,11 +8,6 @@ public enum MXLMusicItem {
     case sound(Float?)
 }
 
-// MARK: - Codable
-
-extension MXLMusicItem: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLMusicItem: Sendable {

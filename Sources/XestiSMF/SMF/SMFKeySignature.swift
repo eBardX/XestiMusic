@@ -236,11 +236,6 @@ extension SMFKeySignature: BytesValueConvertible {
     }
 }
 
-// MARK: - Codable
-
-extension SMFKeySignature: Codable {
-}
-
 // MARK: - Sendable
 
 extension SMFKeySignature: Sendable {

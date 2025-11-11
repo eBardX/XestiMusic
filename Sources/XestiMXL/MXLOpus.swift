@@ -16,11 +16,6 @@ public struct MXLOpus {
     public let title: String
 }
 
-// MARK: - Codable
-
-extension MXLOpus: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLOpus: Sendable {

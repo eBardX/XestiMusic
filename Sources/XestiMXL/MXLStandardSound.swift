@@ -13,11 +13,6 @@ public struct MXLStandardSound {
     public let id: String
 }
 
-// MARK: - Codable
-
-extension MXLStandardSound: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLStandardSound: Sendable {

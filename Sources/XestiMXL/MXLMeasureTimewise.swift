@@ -16,11 +16,6 @@ public struct MXLMeasureTimewise {
     public let parts: [MXLPartTimewise]
 }
 
-// MARK: - Codable
-
-extension MXLMeasureTimewise: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLMeasureTimewise: Sendable {

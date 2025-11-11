@@ -25,11 +25,6 @@ public struct MXLScorePartwise {
     public let work: MXLWork?
 }
 
-// MARK: - Codable
-
-extension MXLScorePartwise: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLScorePartwise: Sendable {

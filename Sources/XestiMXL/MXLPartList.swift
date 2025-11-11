@@ -13,11 +13,6 @@ public struct MXLPartList {
     public let scoreParts: [MXLScorePart]
 }
 
-// MARK: - Codable
-
-extension MXLPartList: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLPartList: Sendable {

@@ -7,11 +7,6 @@ public struct SMFTrack {
     public let events: [SMFEvent]
 }
 
-// MARK: - Codable
-
-extension SMFTrack: Codable {
-}
-
 // MARK: - Sendable
 
 extension SMFTrack: Sendable {

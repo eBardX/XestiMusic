@@ -127,11 +127,6 @@ extension SMPTETime: BytesValueConvertible {
     }
 }
 
-// MARK: - Codable
-
-extension SMPTETime: Codable {
-}
-
 // MARK: - Sendable
 
 extension SMPTETime: Sendable {

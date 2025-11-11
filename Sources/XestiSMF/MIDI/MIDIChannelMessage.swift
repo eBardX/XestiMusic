@@ -195,11 +195,6 @@ extension MIDIChannelMessage {
     }
 }
 
-// MARK: - Codable
-
-extension MIDIChannelMessage: Codable {
-}
-
 // MARK: - Sendable
 
 extension MIDIChannelMessage: Sendable {

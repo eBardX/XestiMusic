@@ -22,11 +22,6 @@ public struct MXLNote {
     public let value: Self.Value
 }
 
-// MARK: - Codable
-
-extension MXLNote: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLNote: Sendable {

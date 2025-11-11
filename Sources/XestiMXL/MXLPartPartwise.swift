@@ -16,11 +16,6 @@ public struct MXLPartPartwise {
     public let measures: [MXLMeasurePartwise]
 }
 
-// MARK: - Codable
-
-extension MXLPartPartwise: Codable {
-}
-
 // MARK: - Sendable
 
 extension MXLPartPartwise: Sendable {
