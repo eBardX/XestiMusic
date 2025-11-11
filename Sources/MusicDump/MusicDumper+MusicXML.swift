@@ -32,11 +32,11 @@ extension MusicDumper {
             guard case let .container(container) = entity
             else { throw MXLParser.Error.parseFailure(nil) }
 
-            try _dump(container, file)
+            try _dump(2, container, file)
         } else {
             let entity = try MXLParser(readFile(fileURL)).parse()
 
-            _dump(entity)
+            _dump(2, entity)
         }
 
         emit()
@@ -49,7 +49,8 @@ extension MusicDumper {
 
     // MARK: Private Instance Methods
 
-    private func _dump(_ container: MXLContainer,
+    private func _dump(_ indent: Int,
+                       _ container: MXLContainer,
                        _ file: FileWrapper) throws {
         guard let rootFile = container.rootFiles.first
         else { throw MXLParser.Error.noRootFileFound }
@@ -60,32 +61,34 @@ extension MusicDumper {
         }
 
         emit()
-        emit(2, _format(rootFile))
+        emit(indent, _format(rootFile))
 
         let realFile = try file.findFile([rootFile.fullPath])
         let data = try realFile.contentsOfRegularFile()
         let entity = try MXLParser(data).parse()
 
-        _dump(entity)
+        _dump(indent + 2, entity)
     }
 
-    private func _dump(_ entity: MXLEntity) {
+    private func _dump(_ indent: Int,
+                       _ entity: MXLEntity) {
         switch entity {
             // case let .opus(opus):
-            //     _dump(opus)
+            //     _dump(indent, opus)
 
         case let .scorePartwise(score):
-            _dump(score)
+            _dump(indent, score)
 
             // case let .scoreTimewise(score):
-            //     _dump(score)
+            //     _dump(indent, score)
 
         default:
             fatalError("Not yet implemented")
         }
     }
 
-    private func _dump(_ item: MXLMusicItem) {
+    private func _dump(_ indent: Int,
+                       _ item: MXLMusicItem) {
         var line = ""
 
         switch item {
@@ -124,10 +127,11 @@ extension MusicDumper {
             }
         }
 
-        emit(8, line)
+        emit(indent, line)
     }
 
-    private func _dump(_ measure: MXLMeasurePartwise) {
+    private func _dump(_ indent: Int,
+                       _ measure: MXLMeasurePartwise) {
         let items = measure.items
 
         var header = "Measure "
@@ -138,18 +142,19 @@ extension MusicDumper {
         header += format(items.count, "item")
 
         emit()
-        emit(6, header)
+        emit(indent, header)
 
         if !items.isEmpty {
             emit()
 
             for item in items {
-                _dump(item)
+                _dump(indent + 2, item)
             }
         }
     }
 
-    private func _dump(_ movementNumber: String?,
+    private func _dump(_ indent: Int,
+                       _ movementNumber: String?,
                        _ movementTitle: String?) {
         var line = "Movement"
 
@@ -164,10 +169,11 @@ extension MusicDumper {
         }
 
         emit()
-        emit(4, line)
+        emit(indent, line)
     }
 
-    private func _dump(_ partList: MXLPartList) {
+    private func _dump(_ indent: Int,
+                       _ partList: MXLPartList) {
         let scoreParts = partList.scoreParts
 
         var header = "Part-list"
@@ -176,15 +182,16 @@ extension MusicDumper {
         header += format(scoreParts.count, "score-part")
 
         emit()
-        emit(4, header)
+        emit(indent, header)
         emit()
 
         for scorePart in scoreParts {
-            _dump(scorePart)
+            _dump(indent + 2, scorePart)
         }
     }
 
-    private func _dump(_ part: MXLPartPartwise) {
+    private func _dump(_ indent: Int,
+                       _ part: MXLPartPartwise) {
         let measures = part.measures
 
         var header = "Part "
@@ -194,24 +201,26 @@ extension MusicDumper {
         header += format(measures.count, "measure")
 
         emit()
-        emit(4, header)
+        emit(indent, header)
 
         for measure in measures {
-            _dump(measure)
+            _dump(indent + 2, measure)
         }
     }
 
-    private func _dump(_ scorePart: MXLScorePart) {
+    private func _dump(_ indent: Int,
+                       _ scorePart: MXLScorePart) {
         var line = "Score-part "
 
         line += format(scorePart.id)
         line += spacer()
         line += format(scorePart.partName)
 
-        emit(6, line)
+        emit(indent, line)
     }
 
-    private func _dump(_ score: MXLScorePartwise) {
+    private func _dump(_ indent: Int,
+                       _ score: MXLScorePartwise) {
         let parts = score.parts
 
         var header = "Score"
@@ -222,23 +231,25 @@ extension MusicDumper {
         header += format(parts.count, "part")
 
         emit()
-        emit(2, header)
+        emit(indent, header)
 
         if let work = score.work {
-            _dump(work)
+            _dump(indent + 2, work)
         }
 
-        _dump(score.movementNumber,
+        _dump(indent + 2,
+              score.movementNumber,
               score.movementTitle)
 
-        _dump(score.partList)
+        _dump(indent + 2, score.partList)
 
         for part in parts {
-            _dump(part)
+            _dump(indent + 2, part)
         }
     }
 
-    private func _dump(_ work: MXLWork) {
+    private func _dump(_ indent: Int,
+                       _ work: MXLWork) {
         var line = "Work"
 
         if let workNumber = work.workNumber {
@@ -252,29 +263,7 @@ extension MusicDumper {
         }
 
         emit()
-        emit(4, line)
-    }
-
-    private func _format(_ alter: Float?) -> String? {
-        guard let alter
-        else { return nil }
-
-        switch Int(alter) {
-        case -2:
-            return "𝄫"
-
-        case -1:
-            return "♭"
-
-        case 1:
-            return "♯"
-
-        case 2:
-            return "𝄪"
-
-        default:
-            return nil
-        }
+        emit(indent, line)
     }
 
     private func _format(_ note: MXLNote) -> String {
@@ -298,13 +287,18 @@ extension MusicDumper {
     }
 
     private func _format(_ pitch: MXLPitch) -> String {
-        var result = pitch.step
+        var result = "<"
 
-        if let alter = _format(pitch.alter) {
-            result += alter
+        result += format(pitch.step)
+
+        if let alter = pitch.alter {
+            result += ", "
+            result += format(alter)
         }
 
+        result += ", "
         result += format(pitch.octave)
+        result += ">"
 
         return result
     }

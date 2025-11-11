@@ -20,7 +20,7 @@ extension MusicDumper {
 
         let tunes = try parser.parse()
 
-        _dump(tunes)
+        _dump(2, tunes)
 
         emit()
     }
@@ -29,6 +29,7 @@ extension MusicDumper {
 
     // MARK: Private Instance Methods
 
-    private func _dump(_ tunes: [ABCTune]) {
+    private func _dump(_ indent: Int,
+                       _ tunes: [ABCTune]) {
     }
 }

@@ -18,7 +18,7 @@ extension MusicDumper {
 
         // let score = try DKMParser().parse(readFile(fileURL))
 
-        // _dump(score)
+        // _dump(2, score)
 
         emit()
     }
@@ -54,7 +54,8 @@ extension MusicDumper {
 
     // MARK: Private Instance Methods
 
-    private func _dump(_ entry: DKMEntry) {
+    private func _dump(_ indent: Int,
+                       _ entry: DKMEntry) {
         var line = _format(entry.command)
 
         if !entry.arguments.isEmpty {
@@ -62,10 +63,11 @@ extension MusicDumper {
             line += _format(entry.arguments)
         }
 
-        emit(4, line)
+        emit(indent, line)
     }
 
-    private func _dump(_ score: DKMScore) {
+    private func _dump(_ indent: Int,
+                       _ score: DKMScore) {
         let entries = score.entries
 
         var header = "Score"
@@ -76,13 +78,13 @@ extension MusicDumper {
                          plural: "entries")
 
         emit()
-        emit(2, header)
+        emit(indent, header)
 
         if !entries.isEmpty {
             emit()
 
             for entry in entries {
-                _dump(entry)
+                _dump(indent + 2, entry)
             }
         }
     }

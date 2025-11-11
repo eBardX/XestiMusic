@@ -18,16 +18,123 @@ extension MusicDumper {
 
         let score = try GMNParser().parse(readFile(fileURL))
 
-        _dump(score)
+        _dump(2, score)
 
         emit()
     }
 
-    // MARK: Private Type Properties
-
     // MARK: Private Instance Methods
 
-    private func _dump(_ score: GMNScore) {
+    private func _dump(_ indent: Int,
+                       _ chord: GMNChord) {
+        let segments = chord.segments
+
+        var line = "Chord"
+
+        line += spacer()
+        line += format(segments.count, "segment")
+
+        emit(indent, line)
+
+        for segment in segments {
+            _dump(indent + 2, segment)
+        }
+    }
+
+    private func _dump(_ indent: Int,
+                       _ note: GMNNote) {
+        var line = "Note"
+
+        line += spacer()
+        line += _format(note.pitch)
+
+        if let duration = note.duration {
+            line += spacer()
+            line += _format(duration)
+        }
+
+        emit(indent, line)
+    }
+
+    private func _dump(_ indent: Int,
+                       _ parameter: GMNTag.Parameter) {
+        var line = "Parameter"
+
+        switch parameter {
+
+        case let .floating(name, value, unit):
+            if let name {
+                line += spacer()
+                line += format(name)
+            }
+
+            line += spacer()
+            line += format(value)
+
+            if let unit {
+                line += spacer()
+                line += format(unit)
+            }
+
+        case let .integer(name, value, unit):
+            if let name {
+                line += spacer()
+                line += format(name)
+            }
+
+            line += spacer()
+            line += format(value)
+
+            if let unit {
+                line += spacer()
+                line += format(unit)
+            }
+
+        case let .parameter(name, value):
+            if let name {
+                line += spacer()
+                line += format(name)
+            }
+
+            line += spacer()
+            line += format(value)
+
+        case let .string(name, value):
+            if let name {
+                line += spacer()
+                line += format(name)
+            }
+
+            line += spacer()
+            line += format(value)
+
+        case let .variable(name, value):
+            if let name {
+                line += spacer()
+                line += format(name)
+            }
+
+            line += spacer()
+            line += format(value)
+        }
+
+        emit(indent, line)
+    }
+
+    private func _dump(_ indent: Int,
+                       _ rest: GMNRest) {
+        var line = "Rest"
+
+        if let duration = rest.duration {
+            line += spacer()
+            line += _format(duration)
+        }
+
+        emit(indent, line)
+    }
+
+    private func _dump(_ indent: Int,
+                       _ score: GMNScore) {
         let variables = score.variables
         let voices = score.voices
 
@@ -39,56 +146,115 @@ extension MusicDumper {
         header += format(voices.count, "voice")
 
         emit()
-        emit(2, header)
+        emit(indent, header)
 
         if !variables.isEmpty {
             emit()
 
             for variable in variables {
-                _dump(variable)
+                _dump(indent + 2, variable)
             }
         }
 
         for (index, voice) in voices.enumerated() {
-            _dump(voice, index)
+            _dump(indent + 2, voice, index)
         }
     }
 
-    private func _dump(_ symbol: GMNSymbol) {
-        var line = ""
+    private func _dump(_ indent: Int,
+                       _ segment: GMNChord.Segment) {
+        let symbols = segment.symbols
 
+        var line = "Segment"
+
+        line += spacer()
+        line += format(symbols.count, "symbol")
+
+        emit(indent, line)
+
+        for symbol in symbols {
+            _dump(indent + 2, symbol)
+        }
+    }
+
+    private func _dump(_ indent: Int,
+                       _ symbol: GMNSymbol) {
         switch symbol {
-        case .chord:
-            line += "Chord ..."
+        case let .chord(chord):
+            _dump(indent, chord)
 
         case let .note(note):
-            line += "Note"
-            line += spacer()
-            line += _format(note)
+            _dump(indent, note)
 
         case let .rest(rest):
-            line += "Rest"
-            line += spacer()
-            line += _format(rest)
+            _dump(indent, rest)
 
         case let .tablature(tablature):
-            line += "Tablature"
-            line += spacer()
-            line += _format(tablature)
+            _dump(indent, tablature)
 
-        case .tag:
-            line += "Tag ..."
+        case let .tag(tag):
+            _dump(indent, tag)
 
         case let .variable(name):
+            var line = ""
+
             line += "Variable"
             line += spacer()
             line += format(name)
-        }
 
-        emit(6, line)
+            emit(indent, line)
+        }
     }
 
-    private func _dump(_ variable: GMNVariable) {
+    private func _dump(_ indent: Int,
+                       _ tablature: GMNTablature) {
+        var line = "Tablature"
+
+        line += spacer()
+        line += _format(tablature)
+
+        if let duration = tablature.duration {
+            line += spacer()
+            line += _format(duration)
+        }
+
+        emit(indent, line)
+    }
+
+    private func _dump(_ indent: Int,
+                       _ tag: GMNTag) {
+        let parameters = tag.parameters
+        let symbols = tag.symbols
+
+        var line = "Tag"
+
+        line += spacer()
+
+        var name = tag.name
+
+        if let ident = tag.ident {
+            name += format(ident)
+        }
+
+        line += format(name)
+        line += spacer()
+        line += format(parameters.count, "parameter")
+        line += spacer()
+        line += format(symbols.count, "symbol")
+
+        emit(indent, line)
+
+        for parameter in parameters {
+            _dump(indent + 2, parameter)
+        }
+
+        for symbol in symbols {
+            _dump(indent + 2, symbol)
+        }
+    }
+
+    private func _dump(_ indent: Int,
+                       _ variable: GMNVariable) {
         var line = "Variable"
 
         line += spacer()
@@ -106,10 +272,11 @@ extension MusicDumper {
             line += format(value)
         }
 
-        emit(4, line)
+        emit(indent, line)
     }
 
-    private func _dump(_ voice: GMNVoice,
+    private func _dump(_ indent: Int,
+                       _ voice: GMNVoice,
                        _ index: Int) {
         let symbols = voice.symbols
 
@@ -120,115 +287,74 @@ extension MusicDumper {
         header += format(symbols.count, "symbol")
 
         emit()
-        emit(4, header)
+        emit(indent, header)
 
         if !symbols.isEmpty {
             emit()
 
             for symbol in symbols {
-                _dump(symbol)
+                _dump(indent + 2, symbol)
             }
         }
     }
 
-    private func _format(_ duration: GMNDuration?) -> String {
-        guard let duration
-        else { return "(default)" }
+    private func _format(_ duration: GMNDuration) -> String {
+        var result = "<"
 
-        var result = ""
-
-        //
-        // Format dots (if any):
-        //
         switch duration {
-        case let .dots(dots),
-            let .fractionDots(_, _, dots):
-            switch dots {
-            case 1:
-                result += "dotted "
+        case let .dots(dots):
+            result += format(dots, "dot")
 
-            case 2:
-                result += "double-dotted "
-
-            case 3:
-                result += "triple-dotted "
-
-            default:
-                break
-            }
-
-        default:
-            break
-        }
-
-        //
-        // Format numerator/denominator or milliseconds:
-        //
-        switch duration {
-        case .dots:
-            result += "(default)"
-
-        case let .fraction(numerator, denominator),
-            let .fractionDots(numerator, denominator, _):
+        case let .fraction(numerator, denominator):
             result += format(numerator)
             result += "/"
             result += format(denominator)
+
+        case let .fractionDots(numerator, denominator, dots):
+            result += format(numerator)
+            result += "/"
+            result += format(denominator)
+            result += ", "
+            result += format(dots, "dot")
 
         case let .milliseconds(msecs):
             result += format(msecs)
             result += "ms"
         }
 
-        return result
-    }
-
-    private func _format(_ note: GMNNote) -> String {
-        var result = _format(note.pitch)
-
-        result += spacer()
-        result += _format(note.duration)
+        result += ">"
 
         return result
     }
 
     private func _format(_ pitch: GMNPitch) -> String {
-        var result = ""
+        var result = "<"
 
-        //
-        // Format name:
-        //
         result += format(pitch.name)
 
-        //
-        // Format accidental (if any):
-        //
         if let accidental = pitch.accidental {
-            result += spacer()
+            result += ", "
             result += format(accidental)
         }
 
-        //
-        // Format octave (if any):
-        //
         if let octave = pitch.octave {
-            result += spacer()
+            result += ", "
             result += format(octave)
         }
+
+        result += ">"
 
         return result
     }
 
-    private func _format(_ rest: GMNRest) -> String {
-        _format(rest.duration)
-    }
-
     private func _format(_ tablature: GMNTablature) -> String {
-        var result = format(tablature.fret)
+        var result = "<"
 
-        result += spacer()
         result += format(tablature.tabString)
-        result += spacer()
-        result += _format(tablature.duration)
+        result += ", "
+        result += format(tablature.fret)
+
+        result += ">"
 
         return result
     }

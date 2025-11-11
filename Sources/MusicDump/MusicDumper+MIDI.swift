@@ -20,7 +20,7 @@ extension MusicDumper {
 
         let sequence = try parser.parse()
 
-        _dump(sequence)
+        _dump(2, sequence)
 
         emit()
     }
@@ -145,7 +145,8 @@ extension MusicDumper {
 
     // MARK: Private Instance Methods
 
-    private func _dump(_ event: SMFEvent,
+    private func _dump(_ indent: Int,
+                       _ event: SMFEvent,
                        _ division: SMFDivision) {
         var line = _format(event.eventTime,
                            division)
@@ -163,10 +164,11 @@ extension MusicDumper {
             line += _format(message)
         }
 
-        emit(6, line)
+        emit(indent, line)
     }
 
-    private func _dump(_ sequence: SMFSequence) {
+    private func _dump(_ indent: Int,
+                       _ sequence: SMFSequence) {
         let division = sequence.division
         let sformat = sequence.format
         let tracks = sequence.tracks
@@ -182,14 +184,15 @@ extension MusicDumper {
         header += _format(division)
 
         emit()
-        emit(2, header)
+        emit(indent, header)
 
         for (index, track) in tracks.enumerated() {
-            _dump(track, index, division)
+            _dump(indent + 2, track, index, division)
         }
     }
 
-    private func _dump(_ track: SMFTrack,
+    private func _dump(_ indent: Int,
+                       _ track: SMFTrack,
                        _ index: Int,
                        _ division: SMFDivision) {
         let events = track.events
@@ -201,13 +204,13 @@ extension MusicDumper {
         header += format(events.count, "event")
 
         emit()
-        emit(4, header)
+        emit(indent, header)
 
         if !events.isEmpty {
             emit()
 
             for event in events {
-                _dump(event, division)
+                _dump(indent + 2, event, division)
             }
         }
     }
