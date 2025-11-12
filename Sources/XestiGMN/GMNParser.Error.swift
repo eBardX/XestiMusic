@@ -9,6 +9,7 @@ extension GMNParser {
         case invalidChordSegment([GMNSymbol])
         case invalidNote(Substring)
         case invalidNumber(Substring)
+        case invalidParameterUnit(Substring)
         case invalidRest(Substring)
         case invalidString(Substring)
         case invalidTablature(Substring)
@@ -42,6 +43,9 @@ extension GMNParser.Error: EnhancedError {
 
         case let .invalidNumber(value):
             "Invalid number: ‘\(value)’"
+
+        case let .invalidParameterUnit(value):
+            "Invalid parameter unit: ‘\(value)’"
 
         case let .invalidRest(value):
             "Invalid rest: ‘\(value)’"

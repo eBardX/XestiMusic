@@ -22,12 +22,12 @@ extension GMNTokenizer {
 
     // MARK: Internal Nested Types
 
-    internal typealias BaseTokenizer = XestiTools.Tokenizer
-    internal typealias Condition     = BaseTokenizer.Condition
-    internal typealias Disposition   = BaseTokenizer.Disposition
-    internal typealias Rule          = BaseTokenizer.Rule
-    internal typealias Scanner       = BaseTokenizer.Scanner
-    internal typealias Token         = BaseTokenizer.Token
+    internal typealias BaseTokenizer = /*XestiTools.*/Tokenizer
+    private typealias Condition     = BaseTokenizer.Condition
+    private typealias Disposition   = BaseTokenizer.Disposition
+    private typealias Rule          = BaseTokenizer.Rule
+    private typealias Scanner       = BaseTokenizer.Scanner
+    internal typealias Token = BaseTokenizer.Token
 
     // MARK: Internal Instance Properties
 

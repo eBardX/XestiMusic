@@ -2,8 +2,8 @@
 
 extension GMNTag {
     public enum Parameter {
-        case floating(name: String?, value: Double, unit: String?)
-        case integer(name: String?, value: Int, unit: String?)
+        case floating(name: String?, value: Double, unit: Unit?)
+        case integer(name: String?, value: Int, unit: Unit?)
         case parameter(name: String?, value: String)
         case string(name: String?, value: String)
         case variable(name: String?, value: String)
@@ -57,7 +57,7 @@ extension GMNTag.Parameter {
         }
     }
 
-    public var unit: String? {
+    public var unit: Unit? {
         switch self {
         case let .floating(_, _, unit),
             let .integer(_, _, unit):

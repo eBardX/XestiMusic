@@ -6,10 +6,9 @@ public struct GMNTablature {
 
     // MARK: Public Initializers
 
-    public init?(_ text: Substring) {
-        guard let (tabString, fret, duration) = Self._parseText(text)
-        else { return nil }
-
+    public init(_ tabString: UInt,
+                _ fret: String,
+                _ duration: GMNDuration) {
         self.duration = duration
         self.fret = fret
         self.tabString = tabString
@@ -17,7 +16,7 @@ public struct GMNTablature {
 
     // MARK: Public Instance Properties
 
-    public let duration: GMNDuration?
+    public let duration: GMNDuration
     public let fret: String
     public let tabString: UInt
 }
@@ -26,9 +25,13 @@ public struct GMNTablature {
 
 extension GMNTablature {
 
-    // MARK: Private Type Methods
+    // MARK: Internal Nested Types
 
-    private static func _parseText(_ text: Substring) -> (UInt, String, GMNDuration?)? {
+    internal typealias ParseResult = (tabString: UInt, fret: String, duration: GMNDuration.ParseResult?)
+
+    // MARK: Internal Type Methods
+
+    internal static func parseText(_ text: Substring) -> ParseResult? {
         guard text.hasPrefix("s")
         else { return nil }
 
@@ -43,7 +46,7 @@ extension GMNTablature {
         guard let dtext = result1.tail
         else { return (tabString, fret, nil) }
 
-        return (tabString, fret, GMNDuration(dtext))
+        return (tabString, fret, GMNDuration.parseText(dtext))
     }
 }
 

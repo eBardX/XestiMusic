@@ -4,49 +4,43 @@ public struct GMNPitch {
 
     // MARK: Public Initializers
 
-    public init(_ name: String,
-                _ accidental: String?,
-                _ octave: Int?) {
+    public init(_ name: Name,
+                _ accidental: Accidental?,
+                _ octave: Int) {
         self.accidental = accidental
         self.name = name
         self.octave = octave
     }
 
-    public init?(_ text: Substring) {
-        guard let (name, accidental, octave) = Self._parseText(text)
-        else { return nil }
-
-        self.init(name, accidental, octave)
-    }
-
     // MARK: Public Instance Properties
 
-    public let accidental: String?
-    public let name: String
-    public let octave: Int?
+    public let accidental: Accidental?
+    public let name: Name
+    public let octave: Int
 }
 
 // MARK: -
 
 extension GMNPitch {
 
-    // MARK: Private Type Properties
+    // MARK: Internal Nested Types
 
-    private static let accidentalCS: Set<Character> = ["#", "&"]
-    private static let octaveCS: Set<Character>     = ["-", "+", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    internal typealias ParseResult = (name: Name, accidental: Accidental?, octave: Int?)
 
-    // MARK: Private Type Methods
+    // MARK: Internal Type Methods
 
-    private static func _parseText(_ text: Substring) -> (String, String?, Int?)? {
+    internal static func parseText(_ text: Substring) -> ParseResult? {
         let result1 = text.splitBeforeFirst(octaveCS)
         let result2 = result1.head.splitBeforeFirst(accidentalCS)
 
-        let name = String(result2.head)
-        let accidental: String?
+        guard let name = Name(rawValue: String(result2.head))
+        else { return nil }
+
+        let accidental: Accidental?
         let octave: Int?
 
         if let atext = result2.tail {
-            accidental = String(atext)
+            accidental = Accidental(rawValue: String(atext))
         } else {
             accidental = nil
         }
@@ -59,6 +53,11 @@ extension GMNPitch {
 
         return (name, accidental, octave)
     }
+
+    // MARK: Private Type Properties
+
+    private static let accidentalCS: Set<Character> = ["#", "&"]
+    private static let octaveCS: Set<Character>     = ["-", "+", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 }
 
 // MARK: - Sendable

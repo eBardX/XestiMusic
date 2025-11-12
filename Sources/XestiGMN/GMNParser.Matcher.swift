@@ -16,6 +16,8 @@ extension GMNParser {
 
         // MARK: Private Instance Properties
 
+        private var lastDuration: GMNDuration = defaultDuration
+        private var lastOctave: Int = defaultOctave
         private var tokenReader: TokenReader
     }
 }
@@ -23,10 +25,6 @@ extension GMNParser {
 // MARK: -
 
 extension GMNParser.Matcher {
-
-    // MARK: Internal Nested Types
-
-    internal typealias Error = GMNParser.Error
 
     // MARK: Internal Instance Methods
 
@@ -43,7 +41,45 @@ extension GMNParser.Matcher {
         return GMNScore(variables, voices)
     }
 
+    // MARK: Private Nested Types
+
+    private typealias Error = GMNParser.Error
+
+    // MARK: Private Type Properties
+
+    private static let defaultDuration: GMNDuration = .fraction(1, 4)
+    private static let defaultOctave: Int           = 1
+
     // MARK: Private Instance Methods
+
+    private mutating func _makeDuration(_ result: GMNDuration.ParseResult?) -> GMNDuration {
+//        guard let result
+//        else { return lastDuration }
+//
+//        switch (result, lastDuration) {
+//        case let (.dots(dots), .fraction(num, den)),
+//            let (.dots(dots), .fractionDots(num, den, _)):
+//            lastDuration = .fractionDots(num, den, dots)
+//
+//        case (.dots, _):
+//            break
+//
+//        default:
+//            lastDuration = duration
+//        }
+
+        lastDuration
+    }
+
+    private mutating func _makePitch(_ result: GMNPitch.ParseResult) -> GMNPitch {
+        if let octave = result.octave {
+            lastOctave = octave
+        }
+
+        return GMNPitch(result.name,
+                        result.accidental,
+                        lastOctave)
+    }
 
     private mutating func _matchChord() throws -> GMNSymbol? {
         //
@@ -90,25 +126,33 @@ extension GMNParser.Matcher {
         guard let token = tokenReader.readIfMatches([.note])
         else { return nil }
 
-        guard let note = GMNNote(token.value)
+        guard let result = GMNNote.parseText(token.value)
         else { throw Error.invalidNote(token.value) }
+
+        let note = GMNNote(_makePitch(result.pitch),
+                           _makeDuration(result.duration))
 
         return .note(note)
     }
 
-    private mutating func _matchParameterUnit() -> String? {
+    private mutating func _matchParameterUnit() throws -> GMNTag.Parameter.Unit? {
         guard let token = tokenReader.readIfMatches(.unit)
         else { return nil }
 
-        return String(token.value)
+        guard let unit = GMNTag.Parameter.Unit(rawValue: String(token.value))
+        else { throw Error.invalidParameterUnit(token.value) }
+
+        return unit
     }
 
     private mutating func _matchRest() throws -> GMNSymbol? {
         guard let token = tokenReader.readIfMatches([.rest])
         else { return nil }
 
-        guard let rest = GMNRest(token.value)
+        guard let result = GMNRest.parseText(token.value)
         else { throw Error.invalidRest(token.value) }
+
+        let rest = GMNRest(_makeDuration(result.duration))
 
         return .rest(rest)
     }
@@ -151,8 +195,12 @@ extension GMNParser.Matcher {
         guard let token = tokenReader.readIfMatches(.tablature)
         else { return nil }
 
-        guard let tablature = GMNTablature(token.value)
+        guard let result = GMNTablature.parseText(token.value)
         else { throw Error.invalidTablature(token.value) }
+
+        let tablature = GMNTablature(result.tabString,
+                                     result.fret,
+                                     _makeDuration(result.duration))
 
         return .tablature(tablature)
     }
@@ -239,7 +287,7 @@ extension GMNParser.Matcher {
             guard let value = Double(token.value)
             else { throw Error.invalidNumber(token.value) }
 
-            let unit = _matchParameterUnit()
+            let unit = try _matchParameterUnit()
 
             return .floating(name: name,
                              value: value,
@@ -250,7 +298,7 @@ extension GMNParser.Matcher {
             guard let value = Int(token.value)
             else { throw Error.invalidNumber(token.value) }
 
-            let unit = _matchParameterUnit()
+            let unit = try _matchParameterUnit()
 
             return .integer(name: name,
                             value: value,
@@ -349,6 +397,9 @@ extension GMNParser.Matcher {
         var symbols: [GMNSymbol] = []
 
         try tokenReader.readMustMatch(.squareBracketOpen)
+
+        lastDuration = Self.defaultDuration
+        lastOctave = Self.defaultOctave
 
         while let symbol = try _matchSymbol(inChord: false) {
             symbols.append(symbol)

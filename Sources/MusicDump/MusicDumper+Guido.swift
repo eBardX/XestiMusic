@@ -36,8 +36,8 @@ extension MusicDumper {
 
         emit(indent, line)
 
-        for segment in segments {
-            _dump(indent + 2, segment)
+        for (index, segment) in segments.enumerated() {
+            _dump(indent + 2, segment, index)
         }
     }
 
@@ -47,75 +47,53 @@ extension MusicDumper {
 
         line += spacer()
         line += _format(note.pitch)
-
-        if let duration = note.duration {
-            line += spacer()
-            line += _format(duration)
-        }
+        line += spacer()
+        line += _format(note.duration)
 
         emit(indent, line)
     }
 
     private func _dump(_ indent: Int,
-                       _ parameter: GMNTag.Parameter) {
-        var line = "Parameter"
+                       _ parameter: GMNTag.Parameter,
+                       _ index: Int) {
+        var line = "Parameter #"
+
+        line += format(index + 1)
+        line += spacer()
+
+        if let name = parameter.name {
+            line += name
+        } else {
+            line += "(omitted)"
+        }
+
+        line += spacer()
 
         switch parameter {
-
-        case let .floating(name, value, unit):
-            if let name {
-                line += spacer()
-                line += format(name)
-            }
-
-            line += spacer()
+        case let .floating(_, value, unit):
             line += format(value)
 
             if let unit {
                 line += spacer()
-                line += format(unit)
+                line += unit.rawValue
             }
 
-        case let .integer(name, value, unit):
-            if let name {
-                line += spacer()
-                line += format(name)
-            }
-
-            line += spacer()
+        case let .integer(_, value, unit):
             line += format(value)
 
             if let unit {
                 line += spacer()
-                line += format(unit)
+                line += unit.rawValue
             }
 
-        case let .parameter(name, value):
-            if let name {
-                line += spacer()
-                line += format(name)
-            }
+        case let .parameter(_, value):
+            line += value
 
-            line += spacer()
+        case let .string(_, value):
             line += format(value)
 
-        case let .string(name, value):
-            if let name {
-                line += spacer()
-                line += format(name)
-            }
-
-            line += spacer()
-            line += format(value)
-
-        case let .variable(name, value):
-            if let name {
-                line += spacer()
-                line += format(name)
-            }
-
-            line += spacer()
-            line += format(value)
+        case let .variable(_, value):
+            line += value
         }
 
         emit(indent, line)
@@ -125,10 +103,8 @@ extension MusicDumper {
                        _ rest: GMNRest) {
         var line = "Rest"
 
-        if let duration = rest.duration {
-            line += spacer()
-            line += _format(duration)
-        }
+        line += spacer()
+        line += _format(rest.duration)
 
         emit(indent, line)
     }
@@ -140,10 +116,15 @@ extension MusicDumper {
 
         var header = "Score"
 
-        header += spacer()
-        header += format(variables.count, "variable")
-        header += spacer()
-        header += format(voices.count, "voice")
+        if !variables.isEmpty {
+            header += spacer()
+            header += format(variables.count, "variable")
+        }
+
+        if !voices.isEmpty {
+            header += spacer()
+            header += format(voices.count, "voice")
+        }
 
         emit()
         emit(indent, header)
@@ -151,8 +132,8 @@ extension MusicDumper {
         if !variables.isEmpty {
             emit()
 
-            for variable in variables {
-                _dump(indent + 2, variable)
+            for (index, variable) in variables.enumerated() {
+                _dump(indent + 2, variable, index)
             }
         }
 
@@ -162,11 +143,13 @@ extension MusicDumper {
     }
 
     private func _dump(_ indent: Int,
-                       _ segment: GMNChord.Segment) {
+                       _ segment: GMNChord.Segment,
+                       _ index: Int) {
         let symbols = segment.symbols
 
-        var line = "Segment"
+        var line = "Segment #"
 
+        line += format(index + 1)
         line += spacer()
         line += format(symbols.count, "symbol")
 
@@ -212,11 +195,8 @@ extension MusicDumper {
 
         line += spacer()
         line += _format(tablature)
-
-        if let duration = tablature.duration {
-            line += spacer()
-            line += _format(duration)
-        }
+        line += spacer()
+        line += _format(tablature.duration)
 
         emit(indent, line)
     }
@@ -229,23 +209,27 @@ extension MusicDumper {
         var line = "Tag"
 
         line += spacer()
-
-        var name = tag.name
+        line += tag.name
 
         if let ident = tag.ident {
-            name += format(ident)
+            line += spacer()
+            line += format(ident)
         }
 
-        line += name
-        line += spacer()
-        line += format(parameters.count, "parameter")
-        line += spacer()
-        line += format(symbols.count, "symbol")
+        if !parameters.isEmpty {
+            line += spacer()
+            line += format(parameters.count, "parameter")
+        }
+
+        if !symbols.isEmpty {
+            line += spacer()
+            line += format(symbols.count, "symbol")
+        }
 
         emit(indent, line)
 
-        for parameter in parameters {
-            _dump(indent + 2, parameter)
+        for (index, parameter) in parameters.enumerated() {
+            _dump(indent + 2, parameter, index)
         }
 
         for symbol in symbols {
@@ -254,11 +238,13 @@ extension MusicDumper {
     }
 
     private func _dump(_ indent: Int,
-                       _ variable: GMNVariable) {
-        var line = "Variable"
+                       _ variable: GMNVariable,
+                       _ index: Int) {
+        var line = "Variable #"
 
+        line += format(index + 1)
         line += spacer()
-        line += format(variable.name)
+        line += variable.name
         line += spacer()
 
         switch variable.value {
@@ -299,12 +285,9 @@ extension MusicDumper {
     }
 
     private func _format(_ duration: GMNDuration) -> String {
-        var result = "<"
+        var result = ""
 
         switch duration {
-        case let .dots(dots):
-            result += format(dots, "dot")
-
         case let .fraction(numerator, denominator):
             result += format(numerator)
             result += "/"
@@ -314,7 +297,7 @@ extension MusicDumper {
             result += format(numerator)
             result += "/"
             result += format(denominator)
-            result += ", "
+            result += spacer()
             result += format(dots, "dot")
 
         case let .milliseconds(msecs):
@@ -322,39 +305,31 @@ extension MusicDumper {
             result += "ms"
         }
 
-        result += ">"
-
         return result
     }
 
     private func _format(_ pitch: GMNPitch) -> String {
-        var result = "<"
+        var result = pitch.name.rawValue
 
-        result += format(pitch.name)
+        result += spacer()
 
         if let accidental = pitch.accidental {
-            result += ", "
-            result += format(accidental)
+            result += accidental.rawValue
+        } else {
+            result += "(none)"
         }
 
-        if let octave = pitch.octave {
-            result += ", "
-            result += format(octave)
-        }
-
-        result += ">"
+        result += spacer()
+        result += format(pitch.octave)
 
         return result
     }
 
     private func _format(_ tablature: GMNTablature) -> String {
-        var result = "<"
+        var result = format(tablature.tabString)
 
-        result += format(tablature.tabString)
-        result += ", "
-        result += format(tablature.fret)
-
-        result += ">"
+        result += spacer()
+        result += tablature.fret
 
         return result
     }

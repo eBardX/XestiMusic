@@ -1,7 +1,6 @@
 // © 2025 John Gary Pusey (see LICENSE.md)
 
 public enum GMNDuration {
-    case dots(UInt)                     // dots: 1...3
     case fraction(UInt, UInt)           // numerator: >0, denominator: >0
     case fractionDots(UInt, UInt, UInt) // numerator: >0, denominator: >0, dots: 1...3
     case milliseconds(UInt)             // milliseconds: >0
@@ -11,17 +10,76 @@ public enum GMNDuration {
 
 extension GMNDuration {
 
-    // MARK: Public Type Properties
+    // MARK: Internal Nested Types
 
-    public static let `default`: Self = .fraction(1, 4)
+    internal typealias ParseResult = (numerator: UInt?, denominator: UInt?, dots: UInt?)
 
-    // MARK: Public Initializers
+    // MARK: Internal Type Methods
 
-    public init?(_ text: Substring) {
-        guard let value = Self._parseText(text)
+    internal static func parseText(_ text: Substring) -> ParseResult? {
+        //
+        // One of:
+        //
+        //  *<numerator>
+        //  *<numerator><dots>
+        //  *<numerator>/<denominator>
+        //  *<numerator>/<denominator><dots>
+        //  *<numerator>ms
+        //
+        if text.hasPrefix("*") {
+            let stext = text.dropFirst()
+
+            if stext.hasSuffix("ms") {
+                guard let ms = _parseMillisecondsText(stext.dropLast(2))
+                else { return nil }
+
+                return (ms, 0, nil)
+            }
+
+            let result1 = stext.splitBeforeFirst(".")
+            let result2 = result1.head.splitBeforeFirst("/")
+
+            guard let (numer, denom) = _parseFractionText(result2.head,
+                                                          result2.tail?.dropFirst()),
+                  let dots = _parseDotsText(result1.tail)
+            else { return nil }
+
+            if dots > 0 {
+                return (numer, denom, dots)
+            }
+
+            return (numer, denom, nil)
+        }
+
+        //
+        // One of:
+        //
+        //  /<denominator>
+        //  /<denominator><dots>
+        //
+        //
+        if text.hasPrefix("/") {
+            let result = text.dropFirst().splitBeforeFirst(".")
+
+            guard let (numer, denom) = _parseFractionText(nil, result.head),
+                  let dots = _parseDotsText(result.tail)
+            else { return nil }
+
+            if dots > 0 {
+                return (numer, denom, dots)
+            }
+
+            return (numer, denom, nil)
+        }
+
+        //
+        // <dots>
+        //
+        guard let dots = _parseDotsText(text),
+              dots > 0
         else { return nil }
 
-        self = value
+        return (nil, nil, dots)
     }
 
     // MARK: Private Type Methods
@@ -73,72 +131,6 @@ extension GMNDuration {
         else { return nil }
 
         return UInt(mtext)
-    }
-
-    private static func _parseText(_ text: Substring) -> Self? {
-        //
-        // One of:
-        //
-        //  *<numerator>
-        //  *<numerator><dots>
-        //  *<numerator>/<denominator>
-        //  *<numerator>/<denominator><dots>
-        //  *<numerator>ms
-        //
-        if text.hasPrefix("*") {
-            let stext = text.dropFirst()
-
-            if stext.hasSuffix("ms") {
-                guard let ms = _parseMillisecondsText(stext.dropLast(2))
-                else { return nil }
-
-                return .milliseconds(ms)
-            }
-
-            let result1 = stext.splitBeforeFirst(".")
-            let result2 = result1.head.splitBeforeFirst("/")
-
-            guard let (numer, denom) = _parseFractionText(result2.head,
-                                                          result2.tail?.dropFirst()),
-                  let dots = _parseDotsText(result1.tail)
-            else { return nil }
-
-            if dots > 0 {
-                return .fractionDots(numer, denom, dots)
-            }
-
-            return .fraction(numer, denom)
-        }
-
-        //
-        // One of:
-        //
-        //  /<denominator>
-        //  /<denominator><dots>
-        //
-        //
-        if text.hasPrefix("/") {
-            let result = text.dropFirst().splitBeforeFirst(".")
-
-            guard let (numer, denom) = _parseFractionText(nil, result.head),
-                  let dots = _parseDotsText(result.tail)
-            else { return nil }
-
-            if dots > 0 {
-                return .fractionDots(numer, denom, dots)
-            }
-
-            return .fraction(numer, denom)
-         }
-
-        //
-        // <dots>
-        //
-        guard let dots = _parseDotsText(text),
-              dots > 0
-        else { return nil }
-
-        return .dots(dots)
     }
 }
 

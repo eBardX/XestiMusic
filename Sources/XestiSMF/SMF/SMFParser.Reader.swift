@@ -37,7 +37,7 @@ extension SMFParser.Reader {
 
     // MARK: Internal Nested Types
 
-    internal typealias Error = SMFParser.Error
+    private typealias Error = SMFParser.Error
 
     // MARK: Internal Instance Methods
 

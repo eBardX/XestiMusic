@@ -6,17 +6,15 @@ public struct GMNNote {
 
     // MARK: Public Initializers
 
-    public init?(_ text: Substring) {
-        guard let (pitch, duration) = Self._parseText(text)
-        else { return nil }
-
+    public init(_ pitch: GMNPitch,
+                _ duration: GMNDuration) {
         self.duration = duration
         self.pitch = pitch
     }
 
     // MARK: Public Instance Properties
 
-    public let duration: GMNDuration?
+    public let duration: GMNDuration
     public let pitch: GMNPitch
 }
 
@@ -24,19 +22,23 @@ public struct GMNNote {
 
 extension GMNNote {
 
-    // MARK: Private Type Methods
+    // MARK: Internal Nested Types
 
-    private static func _parseText(_ text: Substring) -> (GMNPitch, GMNDuration?)? {
+    internal typealias ParseResult = (pitch: GMNPitch.ParseResult, duration: GMNDuration.ParseResult?)
+
+    // MARK: Internal Type Methods
+
+    internal static func parseText(_ text: Substring) -> ParseResult? {
         let result = text.splitBeforeFirst([".", "*", "/"])
         let ptext = result.head
 
-        guard let pitch = GMNPitch(ptext)
+        guard let pitch = GMNPitch.parseText(ptext)
         else { return nil }
 
         guard let dtext = result.tail
         else { return (pitch, nil) }
 
-        return (pitch, GMNDuration(dtext))
+        return (pitch, GMNDuration.parseText(dtext))
     }
 }
 

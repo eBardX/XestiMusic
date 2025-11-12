@@ -6,25 +6,26 @@ public struct GMNRest {
 
     // MARK: Public Initializers
 
-    public init?(_ text: Substring) {
-        guard let (_, duration) = Self._parseText(text)
-        else { return nil }
-
+    public init(_ duration: GMNDuration) {
         self.duration = duration
     }
 
     // MARK: Public Instance Properties
 
-    public let duration: GMNDuration?
+    public let duration: GMNDuration
 }
 
 // MARK: -
 
 extension GMNRest {
 
-    // MARK: Private Type Methods
+    // MARK: Internal Nested Types
 
-    private static func _parseText(_ text: Substring) -> (String, GMNDuration?)? {
+    internal typealias ParseResult = (String, duration: GMNDuration.ParseResult?)
+
+    // MARK: Internal Type Methods
+
+    internal static func parseText(_ text: Substring) -> ParseResult? {
         let result = text.splitBeforeFirst([".", "*", "/"])
         let rtext = result.head
 
@@ -34,7 +35,7 @@ extension GMNRest {
         guard let dtext = result.tail
         else { return (rest, nil) }
 
-        return (rest, GMNDuration(dtext))
+        return (rest, GMNDuration.parseText(dtext))
     }
 }
 
