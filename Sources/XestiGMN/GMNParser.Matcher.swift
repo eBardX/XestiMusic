@@ -14,7 +14,7 @@ extension GMNParser {
             self.tokenReader = TokenReader(tokens)
         }
 
-        // MARK: Internal Instance Properties
+        // MARK: Private Instance Properties
 
         private var tokenReader: TokenReader
     }

@@ -16,9 +16,7 @@ extension MusicDumper {
         emit()
         emit(banner)
 
-        var parser = try SMFParser(readFile(fileURL))
-
-        let sequence = try parser.parse()
+        let sequence = try SMFParser().parse(readFile(fileURL))
 
         _dump(2, sequence)
 
