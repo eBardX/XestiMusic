@@ -136,8 +136,7 @@ extension MusicDumper {
 
         var header = "Measure "
 
-        header += format(measure.number,
-                         quoteAndEscape: false)
+        header += measure.number
         header += spacer()
         header += format(items.count, "item")
 
@@ -311,8 +310,7 @@ extension MusicDumper {
 
         if let mediaType = rootFile.mediaType {
             line += " ["
-            line += format(mediaType,
-                           quoteAndEscape: false)
+            line += mediaType
             line += "]"
         }
 

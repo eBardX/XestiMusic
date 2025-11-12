@@ -47,11 +47,7 @@ extension MusicDumper {
         return result
     }
 
-    internal func format(_ value: String,
-                         quoteAndEscape: Bool = true) -> String {
-        guard quoteAndEscape
-        else { return value }
-
+    internal func format(_ value: String) -> String {
         var result = "\""
 
         for chr in value {
@@ -105,7 +101,7 @@ extension MusicDumper {
 
     // MARK: Private Type Methods
 
-    private static func _escape(_ value: Character) -> String {
+    private static func _formatCharacter(_ value: Character) -> String {
         switch value {
         case "\u{00}":
             "\\0"
@@ -119,27 +115,14 @@ extension MusicDumper {
         case "\u{0d}":
             "\\r"
 
-        default:
-            value.unicodeScalars.map {
-                String(format: "\\u{%1$lx}",
-                       $0.value)
-            }.joined()
-        }
-    }
-
-    private static func _formatCharacter(_ value: Character) -> String {
-        switch value {
         case "\"":
             "\\\""
 
         case "\\":
             "\\\\"
 
-        case " "..."~":
-            String(value)
-
         default:
-            _escape(value)
+            String(value)
         }
     }
 }

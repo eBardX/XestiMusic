@@ -236,7 +236,7 @@ extension MusicDumper {
             name += format(ident)
         }
 
-        line += format(name)
+        line += name
         line += spacer()
         line += format(parameters.count, "parameter")
         line += spacer()

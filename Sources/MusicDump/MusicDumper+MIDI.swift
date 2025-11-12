@@ -4,6 +4,8 @@ import Foundation
 import XestiSMF
 import XestiText
 
+// swiftlint:disable file_length
+
 extension MusicDumper {
 
     // MARK: Internal Instance Methods
@@ -143,6 +145,47 @@ extension MusicDumper {
 
     // MARK: Private Instance Methods
 
+    private func _asciify(_ dataByte: UInt8) -> String {
+        switch dataByte {
+        case 0x20...0x7e, 0xa1...0xff:
+            String(Unicode.Scalar(dataByte))
+
+        default:
+            "."
+        }
+    }
+
+    private func _asciify(_ bytes: [UInt8]) -> String {
+        bytes.map { _asciify($0) }.joined(separator: " ")
+    }
+
+    private func _dump(_ indent: Int,
+                       _ bytes: [UInt8],
+                       chunkSize: Int = 16) {
+        emit()
+
+        var tmpBytes = bytes
+
+        while !tmpBytes.isEmpty {
+            let chunk = Array(tmpBytes.prefix(16))
+
+            var line = chunk.hex
+
+            if chunk.count < chunkSize {
+                line += "   ".repeating(to: chunkSize - chunk.count)
+            }
+
+            line += spacer()
+            line += _asciify(chunk)
+
+            emit(indent, line)
+
+            tmpBytes = Array(tmpBytes.dropFirst(chunk.count))
+        }
+
+        emit()
+    }
+
     private func _dump(_ indent: Int,
                        _ event: SMFEvent,
                        _ division: SMFDivision) {
@@ -150,6 +193,8 @@ extension MusicDumper {
                            division)
 
         line += spacer()
+
+        var bytes: [UInt8]?
 
         switch event {
         case let .meta(_, message):
@@ -160,9 +205,15 @@ extension MusicDumper {
 
         case let .sysEx(_, message):
             line += _format(message)
+
+            bytes = message.dataBytes
         }
 
         emit(indent, line)
+
+        if let bytes {
+            _dump(indent + 2, bytes)
+        }
     }
 
     private func _dump(_ indent: Int,
@@ -211,10 +262,6 @@ extension MusicDumper {
                 _dump(indent + 2, event, division)
             }
         }
-    }
-
-    private func _format(_ bytes: [UInt8]) -> String {
-        bytes.hex
     }
 
     private func _format(_ channel: MIDIChannel) -> String {
@@ -406,7 +453,7 @@ extension MusicDumper {
         case let .sequencerSpecific(bytes):
             result += "Sequencer-specific"
             result += spacer()
-            result += _format(bytes)
+            result += bytes.hex
 
         case let .sequenceTrackName(text):
             result += "Sequence/track name"
@@ -444,12 +491,12 @@ extension MusicDumper {
         case let .escape(bytes):
             result += "Escape"
             result += spacer()
-            result += _format(bytes)
+            result += format(bytes.count, "byte")
 
         case let .systemExclusive(bytes):
             result += "System exclusive"
             result += spacer()
-            result += _format(bytes)
+            result += format(bytes.count, "byte")
         }
 
         return result
@@ -460,9 +507,9 @@ extension MusicDumper {
     }
 
     private func _format(_ tempo: SMFTempo) -> String {
-        var result = format(tempo.uintValue)
+        var result = format(tempo.uintValue, "µsecond")
 
-        result += "µs/quarter-note"
+        result += "/quarter-note"
 
         return result
     }
