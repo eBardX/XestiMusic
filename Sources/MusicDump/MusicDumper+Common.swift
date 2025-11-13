@@ -63,13 +63,6 @@ extension MusicDumper {
         Self.uintFormatStyle.format(value)
     }
 
-    internal func readFile(_ fileURL: URL) throws -> Data {
-        let file = try FileWrapper(url: fileURL,
-                                   options: .immediate)
-
-        return try file.contentsOfRegularFile()
-    }
-
     internal func format(_ value: UInt,
                          _ units: String,
                          plural: String? = nil) -> String {
@@ -79,6 +72,13 @@ extension MusicDumper {
         result += value != 1 ? (plural ?? units + "s") : units
 
         return result
+    }
+
+    internal func readFile(_ fileURL: URL) throws -> Data {
+        let file = try FileWrapper(url: fileURL,
+                                   options: .immediate)
+
+        return try file.contentsOfRegularFile()
     }
 
     internal func spacer() -> String {
