@@ -4,8 +4,8 @@ public struct MXLPitch {
 
     // MARK: Public Initializers
 
-    public init(step: String,
-                alter: Float?,
+    public init(step: Step,
+                alter: Float,
                 octave: Int) {
         self.alter = alter
         self.octave = octave
@@ -14,9 +14,9 @@ public struct MXLPitch {
 
     // MARK: Public Instance Properties
 
-    public let alter: Float?
+    public let alter: Float
     public let octave: Int
-    public let step: String
+    public let step: Step
 }
 
 // MARK: - Sendable

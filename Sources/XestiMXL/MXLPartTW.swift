@@ -1,6 +1,6 @@
 // © 2025 John Gary Pusey (see LICENSE.md)
 
-public struct MXLPartTimewise {
+public struct MXLPartTW {
 
     // MARK: Public Initializers
 
@@ -18,5 +18,5 @@ public struct MXLPartTimewise {
 
 // MARK: - Sendable
 
-extension MXLPartTimewise: Sendable {
+extension MXLPartTW: Sendable {
 }

@@ -8,13 +8,8 @@ public struct MXLParser {
 
     // MARK: Public Initializers
 
-    public init(_ data: Data) {
-        self.baseParser = XestiXML.XMLParser(data)
+    public init() {
     }
-
-    // MARK: Private Instance Properties
-
-    private let baseParser: XestiXML.XMLParser<MXLElement, MXLAttribute>
 }
 
 // MARK: -
@@ -23,8 +18,8 @@ extension MXLParser {
 
     // MARK: Public Instance Methods
 
-    public func parse() throws -> MXLEntity {
-        let rootNode = try baseParser.parse()
+    public func parse(_ data: Data) throws -> MXLEntity {
+        let rootNode = try BaseParser(data).parse()
 
         switch rootNode.element {
         case .container:
@@ -34,10 +29,10 @@ extension MXLParser {
             return try .opus(Self._parseOpus(rootNode))
 
         case .scorePartwise:
-            return try .scorePartwise(Self._parseScorePartwise(rootNode))
+            return try .scorePartwise(Self._parseScorePW(rootNode))
 
         case .scoreTimewise:
-            return try .scoreTimewise(Self._parseScoreTimewise(rootNode))
+            return try .scoreTimewise(Self._parseScoreTW(rootNode))
 
         case .sounds:
             return try .sounds(Self._parseStandardSounds(rootNode))
@@ -51,7 +46,8 @@ extension MXLParser {
 
     // MARK: Private Nested Types
 
-    private typealias Node = XestiXML.XMLNode<MXLElement, MXLAttribute>
+    private typealias BaseParser = XestiXML.XMLParser<MXLElement, MXLAttribute>
+    private typealias Node       = XestiXML.XMLNode<MXLElement, MXLAttribute>
 
     // MARK: Private Type Methods
 
@@ -90,12 +86,8 @@ extension MXLParser {
         }
     }
 
-    private static func _makeStep(_ string: String) -> String? {
-        if ["A", "B", "C", "D", "E", "F", "G"].contains(string) {
-            string
-        } else {
-            nil
-        }
+    private static func _makeStep(_ string: String) -> MXLPitch.Step? {
+        MXLPitch.Step(rawValue: string)
     }
 
     private static func _makeTempo(_ string: String) -> Float? {
@@ -107,18 +99,19 @@ extension MXLParser {
         }
     }
 
-    private static func _parseAttributes(_ node: Node) throws -> MXLMusicItem {
+    private static func _parseAttributes(_ node: Node) throws -> MXLMusicItem? {
         //
         // Content ::= <divisions>?
         //
         try node.expectElement(.attributes)
 
-        let divisions = try node.valueOfOptionalChildElement(.divisions) { _makeDivisions($0) }
+        guard let divisions = try node.valueOfOptionalChildElement(.divisions, { _makeDivisions($0) })
+        else { return nil }
 
         return .attributes(divisions)
     }
 
-    private static func _parseBackup(_ node: Node) throws -> MXLMusicItem {
+    private static func _parseBackup(_ node: Node) throws -> MXLMusicItem? {
         //
         // Content ::= <duration>
         //
@@ -140,7 +133,7 @@ extension MXLParser {
         return MXLContainer(rootFiles: rootFiles)
     }
 
-    private static func _parseForward(_ node: Node) throws -> MXLMusicItem {
+    private static func _parseForward(_ node: Node) throws -> MXLMusicItem? {
         //
         // Content ::= <duration>
         //
@@ -151,7 +144,7 @@ extension MXLParser {
         return .forward(duration)
     }
 
-    private static func _parseMeasurePartwise(_ node: Node) throws -> MXLMeasurePartwise {
+    private static func _parseMeasurePW(_ node: Node) throws -> MXLMeasurePW {
         //
         // Content ::= ( <attributes> | <backup> | <forward> | <note> | <sound> )*
         //
@@ -161,13 +154,13 @@ extension MXLParser {
 
         let items = try node.optionalChildElements([.attributes, .backup, .forward, .note, .sound]) {
             try _parseMusicItem($0)
-        }
+        }.compactMap { $0 }
 
-        return MXLMeasurePartwise(number: number,
-                                  items: items)
+        return MXLMeasurePW(number: number,
+                            items: items)
     }
 
-    private static func _parseMeasureTimewise(_ node: Node) throws -> MXLMeasureTimewise {
+    private static func _parseMeasureTW(_ node: Node) throws -> MXLMeasureTW {
         //
         // Content ::= <part>+
         //
@@ -175,13 +168,13 @@ extension MXLParser {
 
         let number = try node.valueOfRequiredAttribute(.number)
 
-        let parts = try node.requiredChildElements(.part) { try _parsePartTimewise($0) }
+        let parts = try node.requiredChildElements(.part) { try _parsePartTW($0) }
 
-        return MXLMeasureTimewise(number: number,
-                                  parts: parts)
+        return MXLMeasureTW(number: number,
+                            parts: parts)
     }
 
-    private static func _parseMusicItem(_ node: Node) throws -> MXLMusicItem {
+    private static func _parseMusicItem(_ node: Node) throws -> MXLMusicItem? {
         //
         // Content ::= <attributes> | <backup> | <forward> | <note> | <sound>
         //
@@ -204,11 +197,11 @@ extension MXLParser {
             return try _parseSound(node)
 
         default:
-            fatalError("Logic error!")
+            return nil
         }
     }
 
-    private static func _parseNote(_ node: Node) throws -> MXLMusicItem {
+    private static func _parseNote(_ node: Node) throws -> MXLMusicItem? {
         //
         // Content ::= <chord>? ( <pitch> | <unpitched> | <rest> ) <duration> <tie>{0,2}
         //
@@ -220,17 +213,20 @@ extension MXLParser {
             try _parseNoteValue($0)
         }
 
+        guard let value
+        else { return nil }
+
         let duration = try node.valueOfRequiredChildElement(.duration) { _makeDuration($0) }
 
         let tie = try node.optionalChildElements(.tie) { try _parseTie($0) }.reduce(.neither, +)
 
-        return .note(MXLNote(chord: chord,
+        return .note(MXLNote(chord: chord ?? false,
                              value: value,
                              duration: duration,
                              tie: tie))
     }
 
-    private static func _parseNoteValue(_ node: Node) throws -> MXLNote.Value {
+    private static func _parseNoteValue(_ node: Node) throws -> MXLNote.Value? {
         //
         // Content ::= <pitch> | <unpitched> | <rest>
         //
@@ -247,7 +243,7 @@ extension MXLParser {
             return .unpitched
 
         default:
-            fatalError("Logic error!")
+            return nil
         }
     }
 
@@ -261,13 +257,13 @@ extension MXLParser {
 
         let items = try node.optionalChildElements([.opus, .opusLink, .score]) {
             try _parseOpusItem($0)
-        }
+        }.compactMap { $0 }
 
         return MXLOpus(title: title,
                        items: items)
     }
 
-    private static func _parseOpusItem(_ node: Node) throws -> MXLOpus.Item {
+    private static func _parseOpusItem(_ node: Node) throws -> MXLOpus.Item? {
         //
         // Content ::= <opus> | <opus-link> | <score>
         //
@@ -284,7 +280,7 @@ extension MXLParser {
             return try .score(node.valueOfRequiredAttribute(.xlinkHref))
 
         default:
-            fatalError("Logic error!")
+            return nil
         }
     }
 
@@ -299,7 +295,7 @@ extension MXLParser {
         return MXLPartList(scoreParts: scoreParts)
     }
 
-    private static func _parsePartPartwise(_ node: Node) throws -> MXLPartPartwise {
+    private static func _parsePartPW(_ node: Node) throws -> MXLPartPW {
         //
         // Content ::= <measure>+
         //
@@ -307,13 +303,13 @@ extension MXLParser {
 
         let id = try node.valueOfRequiredAttribute(.id)
 
-        let measures = try node.requiredChildElements(.measure) { try _parseMeasurePartwise($0) }
+        let measures = try node.requiredChildElements(.measure) { try _parseMeasurePW($0) }
 
-        return MXLPartPartwise(id: id,
-                               measures: measures)
+        return MXLPartPW(id: id,
+                         measures: measures)
     }
 
-    private static func _parsePartTimewise(_ node: Node) throws -> MXLPartTimewise {
+    private static func _parsePartTW(_ node: Node) throws -> MXLPartTW {
         //
         // Content ::= ( <attributes> | <backup> | <forward> | <note> | <sound> )*
         //
@@ -323,10 +319,10 @@ extension MXLParser {
 
         let items = try node.optionalChildElements([.attributes, .backup, .forward, .note, .sound]) {
             try _parseMusicItem($0)
-        }
+        }.compactMap { $0 }
 
-        return MXLPartTimewise(id: id,
-                               items: items)
+        return MXLPartTW(id: id,
+                         items: items)
     }
 
     private static func _parsePitch(_ node: Node) throws -> MXLNote.Value {
@@ -342,7 +338,7 @@ extension MXLParser {
         let octave = try node.valueOfRequiredChildElement(.octave) { _makeOctave($0) }
 
         return .pitch(MXLPitch(step: step,
-                               alter: alter,
+                               alter: alter ?? .zero,
                                octave: octave))
     }
 
@@ -354,7 +350,7 @@ extension MXLParser {
         let mediaType = try node.valueOfOptionalAttribute(.mediaType)
 
         return MXLRootFile(fullPath: fullPath,
-                           mediaType: mediaType)
+                           mediaType: mediaType ?? MXLRootFile.defaultMediaType)
     }
 
     private static func _parseRootFiles(_ node: Node) throws -> [MXLRootFile] {
@@ -382,7 +378,7 @@ extension MXLParser {
                             partName: partName)
     }
 
-    private static func _parseScorePartwise(_ node: Node) throws -> MXLScorePartwise {
+    private static func _parseScorePW(_ node: Node) throws -> MXLScorePW {
         //
         // Content ::= <work>? <movement-number>? <movement-title>? <part-list> <part>+
         //
@@ -396,20 +392,20 @@ extension MXLParser {
 
         let partList = try node.requiredChildElement(.partList) { try _parsePartList($0) }
 
-        let parts = try node.requiredChildElements(.part) { try _parsePartPartwise($0) }
+        let parts = try node.requiredChildElements(.part) { try _parsePartPW($0) }
 
-        return MXLScorePartwise(work: work,
-                                movementNumber: movementNumber,
-                                movementTitle: movementTitle,
-                                partList: partList,
-                                parts: parts)
+        return MXLScorePW(work: work,
+                          movementNumber: movementNumber,
+                          movementTitle: movementTitle,
+                          partList: partList,
+                          parts: parts)
     }
 
-    private static func _parseScoreTimewise(_ node: Node) throws -> MXLScoreTimewise {
+    private static func _parseScoreTW(_ node: Node) throws -> MXLScoreTW {
         //
         // Content ::= <work>? <movement-number>? <movement-title>? <part-list> <measure>+
         //
-        try node.expectElement(.scorePartwise)
+        try node.expectElement(.scoreTimewise)
 
         let work = try node.optionalChildElement(.work) { try _parseWork($0) }
 
@@ -419,19 +415,20 @@ extension MXLParser {
 
         let partList = try node.requiredChildElement(.partList) { try _parsePartList($0) }
 
-        let measures = try node.requiredChildElements(.measure) { try _parseMeasureTimewise($0) }
+        let measures = try node.requiredChildElements(.measure) { try _parseMeasureTW($0) }
 
-        return MXLScoreTimewise(work: work,
-                                movementNumber: movementNumber,
-                                movementTitle: movementTitle,
-                                partList: partList,
-                                measures: measures)
+        return MXLScoreTW(work: work,
+                          movementNumber: movementNumber,
+                          movementTitle: movementTitle,
+                          partList: partList,
+                          measures: measures)
     }
 
-    private static func _parseSound(_ node: Node) throws -> MXLMusicItem {
+    private static func _parseSound(_ node: Node) throws -> MXLMusicItem? {
         try node.expectElement(.sound)
 
-        let tempo = try node.valueOfOptionalAttribute(.tempo) { _makeTempo($0) }
+        guard let tempo = try node.valueOfOptionalAttribute(.tempo, { _makeTempo($0) })
+        else { return nil }
 
         return .sound(tempo)
     }

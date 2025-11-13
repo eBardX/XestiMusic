@@ -1,6 +1,6 @@
 // © 2025 John Gary Pusey (see LICENSE.md)
 
-public struct MXLScoreTimewise {
+public struct MXLScorePW {
 
     // MARK: Public Initializers
 
@@ -8,24 +8,24 @@ public struct MXLScoreTimewise {
                 movementNumber: String?,
                 movementTitle: String?,
                 partList: MXLPartList,
-                measures: [MXLMeasureTimewise]) {
-        self.measures = measures
+                parts: [MXLPartPW]) {
         self.movementNumber = movementNumber
         self.movementTitle = movementTitle
         self.partList = partList
+        self.parts = parts
         self.work = work
     }
 
     // MARK: Public Instance Properties
 
-    public let measures: [MXLMeasureTimewise]
     public let movementNumber: String?
     public let movementTitle: String?
     public let partList: MXLPartList
+    public let parts: [MXLPartPW]
     public let work: MXLWork?
 }
 
 // MARK: - Sendable
 
-extension MXLScoreTimewise: Sendable {
+extension MXLScorePW: Sendable {
 }

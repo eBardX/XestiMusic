@@ -3,8 +3,8 @@
 public enum MXLEntity {
     case container(MXLContainer)
     case opus(MXLOpus)
-    case scorePartwise(MXLScorePartwise)
-    case scoreTimewise(MXLScoreTimewise)
+    case scorePartwise(MXLScorePW)
+    case scoreTimewise(MXLScoreTW)
     case sounds([MXLStandardSound])
 }
 

@@ -1,11 +1,11 @@
 // © 2025 John Gary Pusey (see LICENSE.md)
 
-public struct MXLPartPartwise {
+public struct MXLPartPW {
 
     // MARK: Public Initializers
 
     public init(id: String,
-                measures: [MXLMeasurePartwise]) {
+                measures: [MXLMeasurePW]) {
         self.id = id
         self.measures = measures
     }
@@ -13,10 +13,10 @@ public struct MXLPartPartwise {
     // MARK: Public Instance Properties
 
     public let id: String
-    public let measures: [MXLMeasurePartwise]
+    public let measures: [MXLMeasurePW]
 }
 
 // MARK: - Sendable
 
-extension MXLPartPartwise: Sendable {
+extension MXLPartPW: Sendable {
 }

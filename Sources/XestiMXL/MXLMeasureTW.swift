@@ -1,22 +1,22 @@
 // © 2025 John Gary Pusey (see LICENSE.md)
 
-public struct MXLMeasurePartwise {
+public struct MXLMeasureTW {
 
     // MARK: Public Initializers
 
     public init(number: String,
-                items: [MXLMusicItem]) {
-        self.items = items
+                parts: [MXLPartTW]) {
         self.number = number
+        self.parts = parts
     }
 
     // MARK: Public Instance Properties
 
-    public let items: [MXLMusicItem]
     public let number: String
+    public let parts: [MXLPartTW]
 }
 
 // MARK: - Sendable
 
-extension MXLMeasurePartwise: Sendable {
+extension MXLMeasureTW: Sendable {
 }

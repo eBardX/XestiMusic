@@ -2,10 +2,12 @@
 
 public struct MXLRootFile {
 
+    public static let defaultMediaType = "application/vnd.recordare.musicxml+xml"
+
     // MARK: Public Initializers
 
     public init(fullPath: String,
-                mediaType: String?) {
+                mediaType: String) {
         self.fullPath = fullPath
         self.mediaType = mediaType
     }
@@ -13,7 +15,7 @@ public struct MXLRootFile {
     // MARK: Public Instance Properties
 
     public let fullPath: String
-    public let mediaType: String?
+    public let mediaType: String
 }
 
 // MARK: - Sendable
