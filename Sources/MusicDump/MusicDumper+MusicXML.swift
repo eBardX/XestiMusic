@@ -23,21 +23,10 @@ extension MusicDumper {
         emit()
         emit(banner)
 
-        if compressed {
-            let file = try unzipArchive(fileURL)
-            let conFile = try file.findFile("META-INF/container.xml")
-            let data = try conFile.contentsOfRegularFile()
-            let entity = try MXLParser().parse(data)
+        let entity = try MXLParser().parse(readFile(fileURL),
+                                           compressed: compressed)
 
-            guard case let .container(container) = entity
-            else { throw MXLParser.Error.parseFailure(nil) }
-
-            try _dump(2, container, file)
-        } else {
-            let entity = try MXLParser().parse(readFile(fileURL))
-
-            _dump(2, entity)
-        }
+        _dump(2, entity)
 
         emit()
     }
@@ -81,7 +70,8 @@ extension MusicDumper {
 
         let realFile = try file.findFile([rootFile.fullPath])
         let data = try realFile.contentsOfRegularFile()
-        let entity = try MXLParser().parse(data)
+        let entity = try MXLParser().parse(data,
+                                           compressed: false)
 
         _dump(indent + 2, entity)
     }
@@ -127,6 +117,8 @@ extension MusicDumper {
             line += format(duration)
 
         case let .note(note):
+            line += "Note"
+            line += spacer()
             line += _format(note)
 
         case let .sound(tempo):
@@ -487,7 +479,7 @@ extension MusicDumper {
     private func _format(_ value: MXLNote.Value) -> String {
         switch value {
         case let .pitch(pitch):
-            "Pitch" + spacer() + _format(pitch)
+            _format(pitch)
 
         case .rest:
             "Rest"

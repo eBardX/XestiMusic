@@ -1,7 +1,6 @@
 // © 2025 John Gary Pusey (see LICENSE.md)
 
 import Foundation
-// import XestiText
 
 extension MusicDumper {
 
@@ -83,13 +82,6 @@ extension MusicDumper {
 
     internal func spacer() -> String {
         " ∙ "
-    }
-
-    internal func unzipArchive(_ fileURL: URL) throws -> FileWrapper {
-        let file = try FileWrapper(url: fileURL,
-                                   options: .immediate)
-
-        return try file.unzip()
     }
 
     // MARK: Private Type Properties

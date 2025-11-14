@@ -18,36 +18,35 @@ extension MXLParser {
 
     // MARK: Public Instance Methods
 
-    public func parse(_ data: Data) throws -> MXLEntity {
-        let rootNode = try BaseParser(data).parse()
+    public func parse(_ data: Data,
+                      compressed: Bool) throws -> MXLEntity {
+        if compressed {
+            let arcFile = try data.unzip()
 
-        switch rootNode.element {
-        case .container:
-            return try .container(Self._parseContainer(rootNode))
+            switch try Self._parse(Self._readContainerData(from: arcFile)) {
+            case let .container(container):
+                return try Self._parse(Self._readRootData(from: arcFile,
+                                                          in: container))
 
-        case .opus:
-            return try .opus(Self._parseOpus(rootNode))
-
-        case .scorePartwise:
-            return try .scorePartwise(Self._parseScorePW(rootNode))
-
-        case .scoreTimewise:
-            return try .scoreTimewise(Self._parseScoreTW(rootNode))
-
-        case .sounds:
-            return try .sounds(Self._parseStandardSounds(rootNode))
-
-        default:
-            try rootNode.unexpectedRootElement()
-
-            fatalError("Logic error!")
+            default:
+                throw Error.parseFailure(nil)
+            }
         }
+
+        return try Self._parse(data)
     }
 
     // MARK: Private Nested Types
 
     private typealias BaseParser = XestiXML.XMLParser<MXLElement, MXLAttribute>
     private typealias Node       = XestiXML.XMLNode<MXLElement, MXLAttribute>
+
+    // MARK: Private Type Properties
+
+    private static let containerFileName     = "container.xml"
+    private static let metaInfoDirectoryName = "META-INF"
+    private static let validMediaTypes       = [MXLRootFile.uncompressedMediaType,
+                                                MXLRootFile.oldUncompressedMediaType]
 
     // MARK: Private Type Methods
 
@@ -96,6 +95,32 @@ extension MXLParser {
             tempo
         } else {
             nil
+        }
+    }
+
+    private static func _parse(_ data: Data) throws -> MXLEntity {
+        let rootNode = try BaseParser(data).parse()
+
+        switch rootNode.element {
+        case .container:
+            return try .container(_parseContainer(rootNode))
+
+        case .opus:
+            return try .opus(_parseOpus(rootNode))
+
+        case .scorePartwise:
+            return try .scorePartwise(_parseScorePW(rootNode))
+
+        case .scoreTimewise:
+            return try .scoreTimewise(_parseScoreTW(rootNode))
+
+        case .sounds:
+            return try .sounds(_parseStandardSounds(rootNode))
+
+        default:
+            try rootNode.unexpectedRootElement()
+
+            fatalError("Logic error!")
         }
     }
 
@@ -203,11 +228,27 @@ extension MXLParser {
 
     private static func _parseNote(_ node: Node) throws -> MXLMusicItem? {
         //
+        // Content ::= <cue> … -- ignore completely
+        // Content ::= <grace> <chord>? ( <pitch> | <unpitched> | <rest> ) <tie>{0,2}
         // Content ::= <chord>? ( <pitch> | <unpitched> | <rest> ) <duration> <tie>{0,2}
         //
         try node.expectElement(.note)
 
-        let chord = try node.valueOfOptionalChildElement(.chord) { $0.isEmpty }
+        guard node.firstChildElement(.cue) == nil
+        else { return nil }
+
+        //
+        // If a <grace/> child element is present, then there should be no
+        // <duration> child element. In this case, the duration is calculated in
+        // accordance with various attributes on the <grace/> child element:
+        // make-time, steal-time-following, steal-time-previous. We will
+        // probably need to make a new MXLMusicItem case, .graceNote(_), and a
+        // new structure, MXLGraceNote. For now, just skip it:
+        //
+        guard node.firstChildElement(.grace) == nil
+        else { return nil }
+
+        let chord = try node.valueOfOptionalChildElement(.chord) { $0.isEmpty } // not quite correct…
 
         let value = try node.requiredChildElement([.pitch, .rest, .unpitched]) {
             try _parseNoteValue($0)
@@ -462,5 +503,21 @@ extension MXLParser {
 
         return MXLWork(workNumber: workNumber,
                        workTitle: workTitle)
+    }
+
+    private static func _readContainerData(from file: FileWrapper) throws -> Data {
+        try file.findFile([metaInfoDirectoryName,
+                           containerFileName]).contentsOfRegularFile()
+    }
+
+    private static func _readRootData(from file: FileWrapper,
+                                      in container: MXLContainer) throws -> Data {
+        guard let rootFile = container.rootFiles.first
+        else { throw Error.noRootFileFound }
+
+        guard Self.validMediaTypes.contains(rootFile.mediaType)
+        else { throw Error.invalidRootFileMediaType(rootFile.mediaType) }
+
+        return try file.findFile([rootFile.fullPath]).contentsOfRegularFile()
     }
 }

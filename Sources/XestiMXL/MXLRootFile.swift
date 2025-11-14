@@ -2,7 +2,13 @@
 
 public struct MXLRootFile {
 
-    public static let defaultMediaType = "application/vnd.recordare.musicxml+xml"
+    // MARK: Public Type Properties
+
+    public static let compressedMediaType      = "application/vnd.recordare.musicxml"
+    public static let defaultMediaType         = uncompressedMediaType
+    public static let oldCompressedMediaType   = "application/musicxml+zip"
+    public static let oldUncompressedMediaType = "application/musicxml+xml"
+    public static let uncompressedMediaType    = "application/vnd.recordare.musicxml+xml"
 
     // MARK: Public Initializers
 
