@@ -1,9 +1,9 @@
 // © 2025 John Gary Pusey (see LICENSE.md)
 
 public enum MXLMusicItem {
-    case attributes(Int)
-    case backup(Int)
-    case forward(Int)
+    case attributes(MXLDuration)
+    case backup(MXLDuration)
+    case forward(MXLDuration)
     case note(MXLNote)
     case sound(Float)
 }

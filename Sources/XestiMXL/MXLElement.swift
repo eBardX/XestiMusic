@@ -5,7 +5,7 @@ import XestiXML
 
 // swiftlint:disable file_length type_body_length
 
-public enum MXLElement: String {  // make StringRepresentable instead ???
+public enum MXLElement: String {
     case accent                   = "accent"
     case accidental               = "accidental"
     case accidentalMark           = "accidental-mark"

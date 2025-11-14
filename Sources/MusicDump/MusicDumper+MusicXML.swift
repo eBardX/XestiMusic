@@ -104,17 +104,17 @@ extension MusicDumper {
         case let .attributes(divisions):
             line += "Divisions"
             line += spacer()
-            line += format(divisions)
+            line += _format(divisions)
 
         case let .backup(duration):
             line += "Backup"
             line += spacer()
-            line += format(duration)
+            line += _format(duration)
 
         case let .forward(duration):
             line += "Forward"
             line += spacer()
-            line += format(duration)
+            line += _format(duration)
 
         case let .note(note):
             line += "Note"
@@ -418,12 +418,46 @@ extension MusicDumper {
         emit(indent, line)
     }
 
+    private func _format(_ duration: MXLDuration) -> String {
+        var line = ""
+
+        switch duration {
+        case let .divisions(divisions):
+            line += format(divisions)
+
+        case let .makeTime(divisions):
+            line += "Grace"
+            line += spacer()
+            line += format(divisions)
+            line += " (make)"
+
+        case let .stealFollowing(percent):
+            line += "Grace"
+            line += spacer()
+            line += format(percent)
+            line += "% (following)"
+
+        case let .stealPrevious(percent):
+            line += "Grace"
+            line += spacer()
+            line += format(percent)
+            line += "% (previous)"
+
+        case .unspecified:
+            line += "Grace"
+            line += spacer()
+            line += "(unspecified)"
+        }
+
+        return line
+    }
+
     private func _format(_ note: MXLNote) -> String {
         var line = ""
 
         line += _format(note.value)
         line += spacer()
-        line += format(note.duration)
+        line += _format(note.duration)
 
         if note.chord {
             line += spacer()

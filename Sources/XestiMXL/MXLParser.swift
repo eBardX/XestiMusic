@@ -85,6 +85,15 @@ extension MXLParser {
         }
     }
 
+    private static func _makePercent(_ string: String) -> Float? {
+        if let percent = Float(string),
+           percent > 0 {
+            percent
+        } else {
+            nil
+        }
+    }
+
     private static func _makeStep(_ string: String) -> MXLPitch.Step? {
         MXLPitch.Step(rawValue: string)
     }
@@ -133,7 +142,7 @@ extension MXLParser {
         guard let divisions = try node.valueOfOptionalChildElement(.divisions, { _makeDivisions($0) })
         else { return nil }
 
-        return .attributes(divisions)
+        return .attributes(.divisions(divisions))
     }
 
     private static func _parseBackup(_ node: Node) throws -> MXLMusicItem? {
@@ -144,7 +153,7 @@ extension MXLParser {
 
         let duration = try node.valueOfRequiredChildElement(.duration) { _makeDuration($0) }
 
-        return .backup(duration)
+        return .backup(.divisions(duration))
     }
 
     private static func _parseContainer(_ node: Node) throws -> MXLContainer {
@@ -158,6 +167,38 @@ extension MXLParser {
         return MXLContainer(rootFiles: rootFiles)
     }
 
+    private static func _parseDuration(_ node: Node) throws -> MXLDuration? {
+        //
+        // Content ::= <duration> | <grace>
+        //
+        try node.expectElement([.duration, .grace])
+
+        switch node.element {
+        case .duration:
+            let duration = try node.valueOfExpectedElement(.duration) { _makeDuration($0) }
+
+            return .divisions(duration)
+
+        case .grace:
+            if let value = try node.valueOfOptionalAttribute(.stealTimeFollowing, { _makePercent($0) }) {
+                return .stealFollowing(value)
+            }
+
+            if let value = try node.valueOfOptionalAttribute(.stealTimePrevious, { _makePercent($0) }) {
+                return .stealPrevious(value)
+            }
+
+            if let value = try node.valueOfOptionalAttribute(.makeTime, { _makeDivisions($0) }) {
+                return .makeTime(Float(value))
+            }
+
+            return .unspecified
+
+        default:
+            return nil
+        }
+    }
+
     private static func _parseForward(_ node: Node) throws -> MXLMusicItem? {
         //
         // Content ::= <duration>
@@ -166,7 +207,7 @@ extension MXLParser {
 
         let duration = try node.valueOfRequiredChildElement(.duration) { _makeDuration($0) }
 
-        return .forward(duration)
+        return .forward(.divisions(duration))
     }
 
     private static func _parseMeasurePW(_ node: Node) throws -> MXLMeasurePW {
@@ -234,21 +275,10 @@ extension MXLParser {
         //
         try node.expectElement(.note)
 
-        guard node.firstChildElement(.cue) == nil
+        guard !node.hasChildElement(.cue)
         else { return nil }
 
-        //
-        // If a <grace/> child element is present, then there should be no
-        // <duration> child element. In this case, the duration is calculated in
-        // accordance with various attributes on the <grace/> child element:
-        // make-time, steal-time-following, steal-time-previous. We will
-        // probably need to make a new MXLMusicItem case, .graceNote(_), and a
-        // new structure, MXLGraceNote. For now, just skip it:
-        //
-        guard node.firstChildElement(.grace) == nil
-        else { return nil }
-
-        let chord = try node.valueOfOptionalChildElement(.chord) { $0.isEmpty } // not quite correct…
+        let chord = try node.valueOfOptionalChildElement(.chord) { $0.isEmpty } ?? false
 
         let value = try node.requiredChildElement([.pitch, .rest, .unpitched]) {
             try _parseNoteValue($0)
@@ -257,11 +287,16 @@ extension MXLParser {
         guard let value
         else { return nil }
 
-        let duration = try node.valueOfRequiredChildElement(.duration) { _makeDuration($0) }
+        let duration = try node.requiredChildElement([.duration, .grace]) {
+            try _parseDuration($0)
+        }
+
+        guard let duration
+        else { return nil }
 
         let tie = try node.optionalChildElements(.tie) { try _parseTie($0) }.reduce(.neither, +)
 
-        return .note(MXLNote(chord: chord ?? false,
+        return .note(MXLNote(chord: chord,
                              value: value,
                              duration: duration,
                              tie: tie))

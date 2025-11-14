@@ -3,7 +3,7 @@
 import XestiTools
 import XestiXML
 
-public enum MXLAttribute: String {    // make StringRepresentable instead ???
+public enum MXLAttribute: String {
     case abbreviated        = "abbreviated"
     case above              = "above"
     case accelerate         = "accelerate"

@@ -6,7 +6,7 @@ public struct MXLNote {
 
     public init(chord: Bool,
                 value: Self.Value,
-                duration: Int,
+                duration: MXLDuration,
                 tie: MXLTie) {
         self.chord = chord
         self.duration = duration
@@ -17,7 +17,7 @@ public struct MXLNote {
     // MARK: Public Instance Properties
 
     public let chord: Bool
-    public let duration: Int
+    public let duration: MXLDuration
     public let tie: MXLTie
     public let value: Self.Value
 }
