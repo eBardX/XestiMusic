@@ -278,7 +278,7 @@ extension MXLParser {
         guard !node.hasChildElement(.cue)
         else { return nil }
 
-        let chord = try node.valueOfOptionalChildElement(.chord) { $0.isEmpty } ?? false
+        let isChord = try node.valueOfOptionalChildElement(.chord) { $0.isEmpty } ?? false
 
         let value = try node.requiredChildElement([.pitch, .rest, .unpitched]) {
             try _parseNoteValue($0)
@@ -296,7 +296,7 @@ extension MXLParser {
 
         let tie = try node.optionalChildElements(.tie) { try _parseTie($0) }.reduce(.neither, +)
 
-        return .note(MXLNote(chord: chord,
+        return .note(MXLNote(isChord: isChord,
                              value: value,
                              duration: duration,
                              tie: tie))

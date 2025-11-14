@@ -8,6 +8,23 @@ public enum MXLDuration {
     case unspecified
 }
 
+// MARK: -
+
+extension MXLDuration {
+
+    // MARK: Public Instance Properties
+
+    public var divisions: Int? {
+        switch self {
+        case let .divisions(divisions):
+            divisions
+
+        default:
+            nil
+        }
+    }
+}
+
 // MARK: - Sendable
 
 extension MXLDuration: Sendable {

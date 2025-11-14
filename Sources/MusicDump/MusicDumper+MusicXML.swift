@@ -459,7 +459,7 @@ extension MusicDumper {
         line += spacer()
         line += _format(note.duration)
 
-        if note.chord {
+        if note.isChord {
             line += spacer()
             line += "Chord"
         }

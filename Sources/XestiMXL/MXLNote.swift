@@ -4,22 +4,33 @@ public struct MXLNote {
 
     // MARK: Public Initializers
 
-    public init(chord: Bool,
+    public init(isChord: Bool,
                 value: Self.Value,
                 duration: MXLDuration,
                 tie: MXLTie) {
-        self.chord = chord
         self.duration = duration
+        self.isChord = isChord
         self.tie = tie
         self.value = value
     }
 
     // MARK: Public Instance Properties
 
-    public let chord: Bool
     public let duration: MXLDuration
+    public let isChord: Bool
     public let tie: MXLTie
     public let value: Self.Value
+}
+
+// MARK: -
+
+extension MXLNote {
+
+    // MARK: Public Instance Properties
+
+    public var isGrace: Bool {
+        duration.divisions == nil
+    }
 }
 
 // MARK: - Sendable
