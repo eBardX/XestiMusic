@@ -104,17 +104,22 @@ extension MusicDumper {
         case let .attributes(divisions):
             line += "Divisions"
             line += spacer()
-            line += _format(divisions)
+            line += format(divisions)
 
         case let .backup(duration):
             line += "Backup"
             line += spacer()
-            line += _format(duration)
+            line += format(duration)
 
         case let .forward(duration):
             line += "Forward"
             line += spacer()
-            line += _format(duration)
+            line += format(duration)
+
+        case let .graceNote(graceNote):
+            line += "Grace note"
+            line += spacer()
+            line += _format(graceNote)
 
         case let .note(note):
             line += "Note"
@@ -418,46 +423,53 @@ extension MusicDumper {
         emit(indent, line)
     }
 
-    private func _format(_ duration: MXLDuration) -> String {
+    private func _format(_ graceDuration: MXLGraceDuration) -> String {
         var line = ""
 
-        switch duration {
-        case let .divisions(divisions):
-            line += format(divisions)
-
+        switch graceDuration {
         case let .makeTime(divisions):
-            line += "Grace"
-            line += spacer()
             line += format(divisions)
             line += " (make)"
 
-        case let .stealFollowing(percent):
-            line += "Grace"
-            line += spacer()
+        case let .stealTimeFollowing(percent):
             line += format(percent)
             line += "% (following)"
 
-        case let .stealPrevious(percent):
-            line += "Grace"
-            line += spacer()
+        case let .stealTimePrevious(percent):
             line += format(percent)
             line += "% (previous)"
 
         case .unspecified:
-            line += "Grace"
-            line += spacer()
             line += "(unspecified)"
         }
 
         return line
     }
 
-    private func _format(_ note: MXLNote) -> String {
-        var line = ""
+    private func _format(_ graceNote: MXLGraceNote) -> String {
+        var line = _format(graceNote.value)
 
-        line += _format(note.value)
         line += spacer()
-        line += _format(note.duration)
+        line += _format(graceNote.duration)
+
+        if graceNote.isChord {
+            line += spacer()
+            line += "Chord"
+        }
+
+        if let result = _format(graceNote.tie) {
+            line += spacer()
+            line += result
+        }
+
+        return line
+    }
+
+    private func _format(_ note: MXLNote) -> String {
+        var line = _format(note.value)
+
+        line += spacer()
+        line += format(note.duration)
 
         if note.isChord {
             line += spacer()

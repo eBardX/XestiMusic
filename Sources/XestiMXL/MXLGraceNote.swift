@@ -1,12 +1,12 @@
 // © 2025 John Gary Pusey (see LICENSE.md)
 
-public struct MXLNote {
+public struct MXLGraceNote {
 
     // MARK: Public Initializers
 
     public init(isChord: Bool,
-                value: Self.Value,
-                duration: UInt,
+                value: MXLNote.Value,
+                duration: MXLGraceDuration,
                 tie: MXLTie) {
         self.duration = duration
         self.isChord = isChord
@@ -16,13 +16,13 @@ public struct MXLNote {
 
     // MARK: Public Instance Properties
 
-    public let duration: UInt
+    public let duration: MXLGraceDuration
     public let isChord: Bool
     public let tie: MXLTie
-    public let value: Self.Value
+    public let value: MXLNote.Value
 }
 
 // MARK: - Sendable
 
-extension MXLNote: Sendable {
+extension MXLGraceNote: Sendable {
 }
