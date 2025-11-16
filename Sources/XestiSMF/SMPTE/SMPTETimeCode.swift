@@ -52,10 +52,10 @@ extension SMPTETimeCode: BytesValueConvertible {
         case .fps25:
             0xe7
 
-        case .fps30df:
+        case .fps2997:
             0xe3
 
-        case .fps30ndf:
+        case .fps30:
             0xe2
         }
     }
@@ -69,10 +69,10 @@ extension SMPTETimeCode: BytesValueConvertible {
             .fps25
 
         case 0xe3:
-            .fps30df
+            .fps2997
 
         case 0xe2:
-            .fps30ndf
+            .fps30
 
         default:
             nil

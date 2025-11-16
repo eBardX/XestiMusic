@@ -4,8 +4,6 @@ import Foundation
 import XestiSMF
 import XestiText
 
-// swiftlint:disable file_length
-
 extension MusicDumper {
 
     // MARK: Internal Instance Methods
@@ -295,37 +293,28 @@ extension MusicDumper {
                          _ division: SMFDivision) -> String {
         switch division {
         case let .metrical(tickRate):
-            _format(eventTime, tickRate)
+            format(eventTime.beatTime(tickRate),
+                   precision: 3...3)
 
         case let .timeCode(timeCode):
-            _format(eventTime, timeCode)
+            _format(eventTime.smpteTime(timeCode),
+                    includeFrameRate: false)
         }
-    }
-
-    private func _format(_ eventTime: SMFEventTime,
-                         _ tickRate: SMFTickRate) -> String {
-        format(Double(eventTime.uintValue) / Double(tickRate.uintValue),
-               precision: 3...3)
-    }
-
-    private func _format(_ eventTime: SMFEventTime,
-                         _ timeCode: SMPTETimeCode) -> String {
-        "\(eventTime)"  // TODO
     }
 
     private func _format(_ frameRate: SMPTEFrameRate) -> String {
         switch frameRate {
         case .fps24:
-            "24fps"
+            "24 fps"
 
         case .fps25:
-            "25fps"
+            "25 fps"
 
-        case .fps30df:
-            "30fps DF"
+        case .fps2997:
+            "29.97 fps"
 
-        case .fps30ndf:
-            "30fps NDF"
+        case .fps30:
+            "30 fps"
         }
     }
 
@@ -463,7 +452,8 @@ extension MusicDumper {
         case let .smpteOffset(time):
             result += "SMPTE offset"
             result += spacer()
-            result += _format(time)
+            result += _format(time,
+                              includeFrameRate: true)
 
         case let .tempo(tempo):
             result += "Tempo"
@@ -528,10 +518,15 @@ extension MusicDumper {
         return result
     }
 
-    private func _format(_ time: SMPTETime) -> String {
-        var result = _format(time.frameRate)
+    private func _format(_ time: SMPTETime,
+                         includeFrameRate: Bool) -> String {
+        var result = ""
 
-        result += spacer()
+        if includeFrameRate {
+            result += _format(time.frameRate)
+            result += spacer()
+        }
+
         result += String(format: "%02d:%02d:%02d %02d.%02d",
                          time.hour,
                          time.minute,

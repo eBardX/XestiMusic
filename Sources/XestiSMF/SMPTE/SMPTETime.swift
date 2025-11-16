@@ -8,12 +8,13 @@ public struct SMPTETime {
                  second: UInt,
                  frame: UInt,
                  fraction: UInt) {
-        guard let maxFrame = Self._maximumFrame(for: frameRate),
-              (0...23).contains(hour),
-              (0...59).contains(minute),
-              (0...59).contains(second),
-              (0...maxFrame).contains(frame),
-              (0...99).contains(fraction)
+        let maxFrame = frameRate.uintValue
+
+        guard (0..<24).contains(hour),
+              (0..<60).contains(minute),
+              (0..<60).contains(second),
+              (0..<maxFrame).contains(frame),
+              (0..<100).contains(fraction)
         else { return nil }
 
         self.fraction = fraction
@@ -32,24 +33,6 @@ public struct SMPTETime {
     public let hour: UInt
     public let minute: UInt
     public let second: UInt
-
-    // MARK: Private Type Methods
-
-    private static func _maximumFrame(for frameRate: SMPTEFrameRate) -> UInt? {
-        switch frameRate {
-        case .fps24:
-            23
-
-        case .fps25:
-            24
-
-        case .fps30df:
-            28
-
-        case .fps30ndf:
-            29
-        }
-    }
 }
 
 // MARK: - BytesValueConvertible
@@ -99,10 +82,10 @@ extension SMPTETime: BytesValueConvertible {
         case .fps25:
             1
 
-        case .fps30df:
+        case .fps2997:
             2
 
-        case .fps30ndf:
+        case .fps30:
             3
         }
     }
@@ -116,10 +99,10 @@ extension SMPTETime: BytesValueConvertible {
             .fps25
 
         case 2:
-            .fps30df
+            .fps2997
 
         case 3:
-            .fps30ndf
+            .fps30
 
         default:
             nil
