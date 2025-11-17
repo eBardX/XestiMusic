@@ -22,12 +22,8 @@ extension GMNTokenizer {
 
     // MARK: Internal Nested Types
 
-    internal typealias BaseTokenizer = /*XestiTools.*/Tokenizer
-    private typealias Condition     = BaseTokenizer.Condition
-    private typealias Disposition   = BaseTokenizer.Disposition
-    private typealias Rule          = BaseTokenizer.Rule
-    private typealias Scanner       = BaseTokenizer.Scanner
-    internal typealias Token = BaseTokenizer.Token
+    internal typealias BaseTokenizer = Tokenizer
+    internal typealias Token         = BaseTokenizer.Token
 
     // MARK: Internal Instance Properties
 
@@ -40,6 +36,13 @@ extension GMNTokenizer {
     internal func tokenize(_ input: String) throws -> [Token] {
         try baseTokenizer.tokenize(input: input)
     }
+
+    // MARK: Private Nested Types
+
+    private typealias Condition   = BaseTokenizer.Condition
+    private typealias Disposition = BaseTokenizer.Disposition
+    private typealias Rule        = BaseTokenizer.Rule
+    private typealias Scanner     = BaseTokenizer.Scanner
 
     // MARK: Private Type Properties
 
