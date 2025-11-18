@@ -269,6 +269,7 @@ extension GMNTokenizer {
             "rl"
         }
     }
+
     private static let accidental: CharacterClass = .anyOf("#&")
     private static let delimiter: CharacterClass  = letter.inverted
     private static let decDigit: CharacterClass   = "0"..."9"

@@ -53,22 +53,32 @@ extension GMNParser.Matcher {
     // MARK: Private Instance Methods
 
     private mutating func _makeDuration(_ result: GMNDuration.ParseResult?) -> GMNDuration {
-//        guard let result
-//        else { return lastDuration }
-//
-//        switch (result, lastDuration) {
-//        case let (.dots(dots), .fraction(num, den)),
-//            let (.dots(dots), .fractionDots(num, den, _)):
-//            lastDuration = .fractionDots(num, den, dots)
-//
-//        case (.dots, _):
-//            break
-//
-//        default:
-//            lastDuration = duration
-//        }
+        guard let result
+        else { return lastDuration }
 
-        lastDuration
+        if let denom = result.denominator,
+           let numer = result.numerator {
+            if let dots = result.dots {
+                lastDuration = .fractionDots(numer, denom, dots)
+            } else if denom > 0 {
+                lastDuration = .fraction(numer, denom)
+            } else {
+                lastDuration = .milliseconds(numer)
+            }
+        }
+
+        if let dots = result.dots {
+            switch lastDuration {
+            case let .fraction(numer, denom),
+                let .fractionDots(numer, denom, _):
+                lastDuration = .fractionDots(numer, denom, dots)
+
+            default:
+                break
+            }
+        }
+
+        return lastDuration
     }
 
     private mutating func _makePitch(_ result: GMNPitch.ParseResult) -> GMNPitch {
@@ -431,11 +441,6 @@ extension GMNParser.Matcher {
 
         return voices
     }
-}
-
-// MARK: -
-
-extension GMNParser.Matcher {
 }
 
 // MARK: - Private Functions
