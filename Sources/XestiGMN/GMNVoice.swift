@@ -4,7 +4,7 @@ public struct GMNVoice {
 
     // MARK: Public Initializers
 
-    public init(_ symbols: [GMNSymbol]) {
+    public init(symbols: [GMNSymbol]) {
         self.symbols = symbols
     }
 

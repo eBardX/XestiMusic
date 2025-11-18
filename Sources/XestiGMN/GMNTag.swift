@@ -4,10 +4,10 @@ public struct GMNTag {
 
     // MARK: Public Initializers
 
-    public init(_ name: String,
-                _ ident: UInt?,
-                _ parameters: [Parameter],
-                _ symbols: [GMNSymbol]) {
+    public init(name: String,
+                ident: UInt?,
+                parameters: [Parameter],
+                symbols: [GMNSymbol]) {
         self.ident = ident
         self.name = name
         self.parameters = parameters

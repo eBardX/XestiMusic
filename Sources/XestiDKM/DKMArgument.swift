@@ -11,7 +11,7 @@ extension DKMArgument {
 
     // MARK: Public Initializers
 
-    public init(_ value: Any) {
+    public init(value: Any) {
         switch value {
         case let value as Double:
             self = .double(value)

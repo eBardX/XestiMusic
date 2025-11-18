@@ -4,10 +4,10 @@ public struct DKMEntry {
 
     // MARK: Public Initializers
 
-    public init(_ command: DKMCommand,
-                _ arguments: Any...) {
+    public init(command: DKMCommand,
+                arguments: Any...) {
         self.command = command
-        self.arguments = arguments.map { DKMArgument($0) }
+        self.arguments = arguments.map { DKMArgument(value: $0) }
     }
 
     // MARK: Public Instance Properties

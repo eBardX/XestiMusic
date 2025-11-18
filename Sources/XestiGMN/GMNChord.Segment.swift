@@ -8,7 +8,7 @@ extension GMNChord {
 
         // MARK: Public Initializers
 
-        public init?(_ symbols: [GMNSymbol]) {
+        public init?(symbols: [GMNSymbol]) {
             guard !Self._containsNestedChord(symbols)
             else { return nil }
 

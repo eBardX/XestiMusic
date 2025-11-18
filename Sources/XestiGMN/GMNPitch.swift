@@ -4,9 +4,9 @@ public struct GMNPitch {
 
     // MARK: Public Initializers
 
-    public init(_ name: Name,
-                _ accidental: Accidental?,
-                _ octave: Int) {
+    public init(name: Name,
+                accidental: Accidental?,
+                octave: Int) {
         self.accidental = accidental
         self.name = name
         self.octave = octave

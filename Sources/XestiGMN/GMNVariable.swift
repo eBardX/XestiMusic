@@ -4,8 +4,8 @@ public struct GMNVariable {
 
     // MARK: Public Initializers
 
-    public init(_ name: String,
-                _ value: Value) {
+    public init(name: String,
+                value: Value) {
         self.name = name
         self.value = value
     }

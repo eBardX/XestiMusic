@@ -6,8 +6,8 @@ public struct GMNNote {
 
     // MARK: Public Initializers
 
-    public init(_ pitch: GMNPitch,
-                _ duration: GMNDuration) {
+    public init(pitch: GMNPitch,
+                duration: GMNDuration) {
         self.duration = duration
         self.pitch = pitch
     }

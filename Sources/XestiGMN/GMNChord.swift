@@ -4,7 +4,7 @@ public struct GMNChord {
 
     // MARK: Public Initializers
 
-    public init(_ segments: [Segment]) {
+    public init(segments: [Segment]) {
         self.segments = segments
     }
 

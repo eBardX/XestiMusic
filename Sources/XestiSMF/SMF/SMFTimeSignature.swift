@@ -4,10 +4,10 @@ public struct SMFTimeSignature {
 
     // MARK: Public Initializers
 
-    public init?(_ numerator: UInt,
-                 _ denominator: UInt,
-                 _ clockRate: UInt,
-                 _ beatRate: UInt) {
+    public init?(numerator: UInt,
+                 denominator: UInt,
+                 clockRate: UInt,
+                 beatRate: UInt) {
         guard (1...255).contains(numerator),
               (2...255).contains(denominator),
               (1...255).contains(clockRate),
@@ -38,10 +38,10 @@ extension SMFTimeSignature: BytesValueConvertible {
         guard bytesValue.count == 4
         else { return nil }
 
-        self.init(UInt(bytesValue[0]),
-                  UInt(bytesValue[1]),
-                  UInt(bytesValue[2]),
-                  UInt(bytesValue[3]))
+        self.init(numerator: UInt(bytesValue[0]),
+                  denominator: UInt(bytesValue[1]),
+                  clockRate: UInt(bytesValue[2]),
+                  beatRate: UInt(bytesValue[3]))
     }
 
     // MARK: Public Instance Properties

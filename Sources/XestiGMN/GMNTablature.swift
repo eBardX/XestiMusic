@@ -6,9 +6,9 @@ public struct GMNTablature {
 
     // MARK: Public Initializers
 
-    public init(_ tabString: UInt,
-                _ fret: String,
-                _ duration: GMNDuration) {
+    public init(tabString: UInt,
+                fret: String,
+                duration: GMNDuration) {
         self.duration = duration
         self.fret = fret
         self.tabString = tabString

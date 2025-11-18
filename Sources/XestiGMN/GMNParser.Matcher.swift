@@ -38,7 +38,8 @@ extension GMNParser.Matcher {
         guard !tokenReader.hasMore
         else { throw Error.trailingGarbage }
 
-        return GMNScore(variables, voices)
+        return GMNScore(variables: variables,
+                        voices: voices)
     }
 
     // MARK: Private Nested Types
@@ -86,9 +87,9 @@ extension GMNParser.Matcher {
             lastOctave = octave
         }
 
-        return GMNPitch(result.name,
-                        result.accidental,
-                        lastOctave)
+        return GMNPitch(name: result.name,
+                        accidental: result.accidental,
+                        octave: lastOctave)
     }
 
     private mutating func _matchChord() throws -> GMNSymbol? {
@@ -118,7 +119,7 @@ extension GMNParser.Matcher {
             guard musicSymbolSeen
             else { throw Error.invalidChordSegment(symbols) }
 
-            guard let segment = GMNChord.Segment(symbols)
+            guard let segment = GMNChord.Segment(symbols: symbols)
             else { throw Error.nestedChord }
 
             segments.append(segment)
@@ -129,7 +130,7 @@ extension GMNParser.Matcher {
 
         try tokenReader.readMustMatch(.curlyBracketClose)
 
-        return .chord(GMNChord(segments))
+        return .chord(GMNChord(segments: segments))
     }
 
     private mutating func _matchNote() throws -> GMNSymbol? {
@@ -139,8 +140,8 @@ extension GMNParser.Matcher {
         guard let result = GMNNote.parseText(token.value)
         else { throw Error.invalidNote(token.value) }
 
-        let note = GMNNote(_makePitch(result.pitch),
-                           _makeDuration(result.duration))
+        let note = GMNNote(pitch: _makePitch(result.pitch),
+                           duration: _makeDuration(result.duration))
 
         return .note(note)
     }
@@ -162,7 +163,7 @@ extension GMNParser.Matcher {
         guard let result = GMNRest.parseText(token.value)
         else { throw Error.invalidRest(token.value) }
 
-        let rest = GMNRest(_makeDuration(result.duration))
+        let rest = GMNRest(duration: _makeDuration(result.duration))
 
         return .rest(rest)
     }
@@ -208,9 +209,9 @@ extension GMNParser.Matcher {
         guard let result = GMNTablature.parseText(token.value)
         else { throw Error.invalidTablature(token.value) }
 
-        let tablature = GMNTablature(result.tabString,
-                                     result.fret,
-                                     _makeDuration(result.duration))
+        let tablature = GMNTablature(tabString: result.tabString,
+                                     fret: result.fret,
+                                     duration: _makeDuration(result.duration))
 
         return .tablature(tablature)
     }
@@ -246,10 +247,10 @@ extension GMNParser.Matcher {
             symbols = []
         }
 
-        return .tag(GMNTag(name,
-                           ident,
-                           parameters,
-                           symbols))
+        return .tag(GMNTag(name: name,
+                           ident: ident,
+                           parameters: parameters,
+                           symbols: symbols))
     }
 
     private mutating func _matchTagParameter() throws -> GMNTag.Parameter? {
@@ -299,9 +300,7 @@ extension GMNParser.Matcher {
 
             let unit = try _matchParameterUnit()
 
-            return .floating(name: name,
-                             value: value,
-                             unit: unit)
+            return .floating(name, value, unit)
         }
 
         if let token = tokenReader.readIfMatches(.integerValue) {
@@ -310,27 +309,22 @@ extension GMNParser.Matcher {
 
             let unit = try _matchParameterUnit()
 
-            return .integer(name: name,
-                            value: value,
-                            unit: unit)
+            return .integer(name, value, unit)
         }
 
         if let token = tokenReader.readIfMatches(.parameterName) {
-            return .parameter(name: name,
-                              value: String(token.value))
+            return .parameter(name, String(token.value))
         }
 
         if let token = tokenReader.readIfMatches(.stringValue) {
             guard let cvtValue = _convertString(token.value)
             else { throw Error.invalidString(token.value) }
 
-            return .string(name: name,
-                           value: cvtValue)
+            return .string(name, cvtValue)
         }
 
         if let token = tokenReader.readIfMatches(.variableName) {
-            return .variable(name: name,
-                             value: String(token.value))
+            return .variable(name, String(token.value))
         }
 
         return nil
@@ -355,7 +349,8 @@ extension GMNParser.Matcher {
 
         try tokenReader.readMustMatch(.semicolon)
 
-        return GMNVariable(name, value)
+        return GMNVariable(name: name,
+                           value: value)
     }
 
     private mutating func _matchVariableName() throws -> String {
@@ -417,7 +412,7 @@ extension GMNParser.Matcher {
 
         try tokenReader.readMustMatch(.squareBracketClose)
 
-        return GMNVoice(symbols)
+        return GMNVoice(symbols: symbols)
     }
 
     private mutating func _matchVoices() throws -> [GMNVoice] {

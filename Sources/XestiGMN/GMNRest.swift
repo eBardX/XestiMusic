@@ -6,7 +6,7 @@ public struct GMNRest {
 
     // MARK: Public Initializers
 
-    public init(_ duration: GMNDuration) {
+    public init(duration: GMNDuration) {
         self.duration = duration
     }
 

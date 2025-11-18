@@ -2,11 +2,11 @@
 
 extension GMNTag {
     public enum Parameter {
-        case floating(name: String?, value: Double, unit: Unit?)
-        case integer(name: String?, value: Int, unit: Unit?)
-        case parameter(name: String?, value: String)
-        case string(name: String?, value: String)
-        case variable(name: String?, value: String)
+        case floating(String?, Double, Unit?)
+        case integer(String?, Int, Unit?)
+        case parameter(String?, String)
+        case string(String?, String)
+        case variable(String?, String)
     }
 }
 

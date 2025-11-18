@@ -4,7 +4,7 @@ public struct DKMScore {
 
     // MARK: Public Initializers
 
-    public init(_ entries: [DKMEntry]) {
+    public init(entries: [DKMEntry]) {
         self.entries = entries
     }
 

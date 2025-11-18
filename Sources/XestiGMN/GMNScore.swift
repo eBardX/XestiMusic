@@ -4,8 +4,8 @@ public struct GMNScore {
 
     // MARK: Public Initializers
 
-    public init(_ variables: [GMNVariable],
-                _ voices: [GMNVoice]) {
+    public init(variables: [GMNVariable],
+                voices: [GMNVoice]) {
         self.variables = variables
         self.voices = voices
     }
