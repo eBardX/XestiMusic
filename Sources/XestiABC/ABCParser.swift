@@ -1,18 +1,19 @@
 // © 2025 John Gary Pusey (see LICENSE.md)
 
 import Foundation
+import XestiTools
 
 public struct ABCParser {
 
     // MARK: Public Initializers
 
-    public init(_ data: Data) {
-        self.preprocessor = ABCPreprocessor(data)
+    public init() {
+        self.tokenizer = ABCTokenizer(tracing: .verbose)
     }
 
     // MARK: Internal Instance Properties
 
-    private var preprocessor: ABCPreprocessor
+    private let tokenizer: ABCTokenizer
 }
 
 // MARK: -
@@ -21,34 +22,13 @@ extension ABCParser {
 
     // MARK: Public Instance Methods
 
-    public mutating func parse() throws -> [ABCTune] {
-        while let line = try preprocessor.nextLine() {
-            let parsedLine = try _parseLine(line)
+    public func parse(_ data: Data) throws -> ABCTunebook {
+        guard let input = String(data: data,
+                                 encoding: .utf8)
+        else { throw Error.dataConversionFailed }
 
-            print(parsedLine)
-        }
+       var matcher = try Matcher(tokenizer.tokenize(input))
 
-        return []
-    }
-
-    // MARK: Private Instance Methods
-
-    private func _parseLine(_ line: String) throws -> Line {
-        guard !line.isEmpty
-        else { return .empty }
-
-        if ABCFileID.canParse(line) {
-            return try .fileID(.parse(line))
-        }
-
-        if ABCDirective.canParse(line) {
-            return try .directive(.parse(line))
-        }
-
-        if ABCField.canParse(line) {
-            return try .field(.parse(line))
-        }
-
-        return try .symbols(ABCSymbol.parseSymbols(line))
+       return try matcher.matchTunebook()
     }
 }

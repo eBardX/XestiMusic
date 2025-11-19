@@ -4,6 +4,7 @@ import XestiTools
 
 extension ABCParser {
     public enum Error {
+        case dataConversionFailed
         case invalidDirective(String)
         case invalidField(String)
         case invalidFileID(String)
@@ -26,6 +27,9 @@ extension ABCParser.Error: EnhancedError {
 
     public var message: String {
         switch self {
+        case .dataConversionFailed:
+            "Failed to convert UTF-8 data to string"
+
         case let .invalidDirective(value):
             "Invalid directive: ‘\(value)’"
 

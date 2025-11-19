@@ -4,13 +4,13 @@ public struct ABCTune {
 
     // MARK: Public Initializers
 
-    public init(_ name: String) {
-        self.name = name
+    public init(entries: [ABCEntry]) {
+        self.entries = entries
     }
 
     // MARK: Public Instance Properties
 
-    public let name: String
+    public let entries: [ABCEntry]
 }
 
 // MARK: - Sendable

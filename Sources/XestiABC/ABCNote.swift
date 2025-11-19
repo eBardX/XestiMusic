@@ -4,9 +4,9 @@ public struct ABCNote {
 
     // MARK: Public Initializers
 
-    public init(_ pitch: ABCPitch,
-                _ duration: ABCFraction,
-                _ isTied: Bool) {
+    public init(pitch: ABCPitch,
+                duration: ABCFraction,
+                isTied: Bool) {
         self.duration = duration
         self.isTied = isTied
         self.pitch = pitch

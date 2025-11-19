@@ -2,24 +2,24 @@
 
 public struct ABCRefNumber {
 
-    // MARK: Public Type Methods
+    // MARK: Public Initializers
 
-    public static func parse(_ value: String) throws -> Self {
-        guard let uintValue = UInt(value),
-              uintValue > 0
-        else { throw ABCParser.Error.invalidRefNumber(value) }
-
-        return Self(uintValue)
+    public init(rawValue: UInt) {
+        self.rawValue = rawValue
     }
 
     // MARK: Public Instance Properties
 
     public let rawValue: UInt
 
-    // MARK: Private Initializers
+    // MARK: Internal Type Methods
 
-    private init(_ rawValue: UInt) {
-        self.rawValue = rawValue
+    internal static func parse(_ value: String) throws -> Self {
+        guard let uintValue = UInt(value),
+              uintValue > 0
+        else { throw ABCParser.Error.invalidRefNumber(value) }
+
+        return Self(rawValue: uintValue)
     }
 }
 

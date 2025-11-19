@@ -16,11 +16,9 @@ extension MusicDumper {
         emit()
         emit(banner)
 
-        var parser = try ABCParser(readFile(fileURL))
+        let tunebook = try ABCParser().parse(readFile(fileURL))
 
-        let tunes = try parser.parse()
-
-        _dump(2, tunes)
+        _dump(2, tunebook)
 
         emit()
     }
@@ -30,6 +28,6 @@ extension MusicDumper {
     // MARK: Private Instance Methods
 
     private func _dump(_ indent: Int,
-                       _ tunes: [ABCTune]) {
+                       _ tunebook: ABCTunebook) {
     }
 }

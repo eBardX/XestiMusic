@@ -2,15 +2,14 @@
 
 public struct ABCPitch {
 
-    // MARK: Public Type Methods
+    // MARK: Public Initializers
 
-    public static func parse(_ value: String) throws -> Self {
-        guard let match = value.wholeMatch(of: /((?:__?|\^\^?|=)?)([A-Ga-g])([',]*)/)
-        else { throw ABCParser.Error.invalidPitch(value) }
-
-        return Self(String(match.2),
-                    String(match.1),
-                    String(match.3))
+    public init(letter: String,
+                accidental: String,
+                octave: String) {
+        self.accidental = accidental
+        self.letter = letter
+        self.octave = octave
     }
 
     // MARK: Public Instance Properties
@@ -18,16 +17,6 @@ public struct ABCPitch {
     public let accidental: String
     public let letter: String
     public let octave: String
-
-    // MARK: Private Initializers
-
-    private init(_ letter: String,
-                 _ accidental: String,
-                 _ octave: String) {
-        self.accidental = accidental
-        self.letter = letter
-        self.octave = octave
-    }
 }
 
 // MARK: - Sendable

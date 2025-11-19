@@ -22,7 +22,7 @@ extension ABCKeySignature.Mode {
 
     // MARK: Public Initializers
 
-    public init?(_ name: String) {
+    public init?(name: String) {
         guard let value = Self.nameMap[name.lowercased()]
         else { return nil }
 

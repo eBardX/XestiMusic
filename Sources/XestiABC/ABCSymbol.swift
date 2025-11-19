@@ -19,19 +19,6 @@ public enum ABCSymbol {
     case variantEnding(String)
 }
 
-// MARK: -
-
-extension ABCSymbol {
-
-    // MARK: Public Type Methods
-
-    public static func parseSymbols(_ value: String) throws -> [Self] {
-        var parser = Parser(value)
-
-        return try parser.parse()
-    }
-}
-
 // MARK: - Sendable
 
 extension ABCSymbol: Sendable {
