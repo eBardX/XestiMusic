@@ -119,10 +119,13 @@ extension ABCTokenizer {
 // MARK: -
 
 extension Tokenizer.Token.Kind {
+    internal static let accidental         = Self("accidental")
+    internal static let annotation         = Self("annotation")
     internal static let backquotes         = Self("backquotes")
     internal static let barRepeat          = Self("barRepeat")
     internal static let brokenRhythmLeft   = Self("brokenRhythmLeft")
     internal static let brokenRhythmRight  = Self("brokenRhythmRight")
+    internal static let chordSymbol        = Self("chordSymbol")
     internal static let comment            = Self("comment")
     internal static let curlyBracketClose  = Self("curlyBracketClose")
     internal static let curlyBracketOpen   = Self("curlyBracketOpen")
@@ -135,7 +138,9 @@ extension Tokenizer.Token.Kind {
     internal static let fieldValue         = Self("fieldValue")
     internal static let fileID             = Self("fileID")
     internal static let forwardSlash       = Self("forwardSlash")
+    internal static let note               = Self("note")
     internal static let noteLength         = Self("noteLength")
+    internal static let octave             = Self("octave")
     internal static let roundBracketClose  = Self("roundBracketClose")
     internal static let roundBracketOpen   = Self("roundBracketOpen")
     internal static let squareBracketClose = Self("squareBracketClose")
