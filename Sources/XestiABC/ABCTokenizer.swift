@@ -62,6 +62,7 @@ extension ABCTokenizer {
         Rule(regexEndOfLine, .endOfLine),
         Rule(regexFieldName, .fieldName),
         Rule(regexFieldValue, .fieldValue),
+        Rule(/\//, .forwardSlash),
         Rule(regexNoteLength, .noteLength),
         Rule(/\(/, .roundBracketOpen),
         Rule(/\)/, .roundBracketClose),
@@ -133,6 +134,7 @@ extension Tokenizer.Token.Kind {
     internal static let fieldName          = Self("fieldName")
     internal static let fieldValue         = Self("fieldValue")
     internal static let fileID             = Self("fileID")
+    internal static let forwardSlash       = Self("forwardSlash")
     internal static let noteLength         = Self("noteLength")
     internal static let roundBracketClose  = Self("roundBracketClose")
     internal static let roundBracketOpen   = Self("roundBracketOpen")
@@ -140,10 +142,4 @@ extension Tokenizer.Token.Kind {
     internal static let squareBracketOpen  = Self("squareBracketOpen")
     internal static let version            = Self("version")
     internal static let whitespace         = Self("whitespace")
-
-//    internal static let angleBracketClose  = Self("angleBracketClose")
-//    internal static let angleBracketOpen   = Self("angleBracketOpen")
-//    internal static let comma              = Self("comma")
-//    internal static let equalSign          = Self("equalSign")
-//    internal static let semicolon          = Self("semicolon")
 }
