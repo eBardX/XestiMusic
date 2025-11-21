@@ -92,6 +92,7 @@ extension GMNTokenizer {
 
     private static func _beginCommentAction(_ scanner: inout Scanner,
                                             _ value: Substring,
+                                            _ location: Substring.Location,
                                             _ condition: Condition) throws -> Disposition? {
         if condition == .initial {
             scanner[.commentNestingLevel] = 1
@@ -106,6 +107,7 @@ extension GMNTokenizer {
 
     private static func _endCommentAction(_ scanner: inout Scanner,
                                           _ value: Substring,
+                                          _ location: Substring.Location,
                                           _ condition: Condition) throws -> Disposition? {
         if var level = scanner[.commentNestingLevel] as? Int {
             level -= 1
