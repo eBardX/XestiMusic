@@ -46,6 +46,15 @@ extension ABCTokenizer {
 
     // MARK: Private Type Properties
 
+    // <delimiter> = /<whitespace>|<eol>|$/
+    //
+    // /<whitespace>?(?:<eol>|$)/ (column == 1) => .save(.emptyLine, nil)
+    // /%abc-<decUInteger>\.<decUInteger>(?=<delimiter>)/ (column == 1) ==> .save(.fileID, nil)
+    // /%%<directiveName>(?=<delimiter>)/ (column == 1) ==> .save(.directiveName, .directive)
+    // /%.*(?:<eol>|$)/ (column > 1) => .skip(nil)
+    // /<fieldName>/ (column == 1) => .save(.fieldName, .field)
+    // /%(???)[^%]*(?:<eol>|$)/ (column == 1) => .skip(nil)
+
     nonisolated(unsafe) private static let rules: [Rule] = [
         Rule(regex: /%abc/,                             // MUST come before .comment
              validation: _locatedAtFirstColumn,
