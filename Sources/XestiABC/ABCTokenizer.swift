@@ -46,33 +46,30 @@ extension ABCTokenizer {
 
     // MARK: Private Type Properties
 
-    // <delimiter> = /<whitespace>|<eol>|$/
+    // <delimiter> = /[ \n\r\t%]|$/
     //
     // /<whitespace>?(?:<eol>|$)/ (column == 1) => .save(.emptyLine, nil)
-    // /%abc-<decUInteger>\.<decUInteger>(?=<delimiter>)/ (column == 1) ==> .save(.fileID, nil)
-    // /%%<directiveName>(?=<delimiter>)/ (column == 1) ==> .save(.directiveName, .directive)
-    // /%.*(?:<eol>|$)/ (column > 1) => .skip(nil)
+    // /%abc-<decUInteger>\.<decUInteger>(?=[ \n\r\t%]|$)/ (column == 1) ==> .save(.fileID, nil)
+    // /%%<directiveName>(?=[ \n\r\t%]|$)/ (column == 1) ==> .save(.directiveName, .directive)
+    // /%.*(?=[ \n\r\t%]|$)/ (column > 1) => .skip(nil)
     // /<fieldName>/ (column == 1) => .save(.fieldName, .field)
-    // /%(???)[^%]*(?:<eol>|$)/ (column == 1) => .skip(nil)
+    // /%(?!%|abc).*(?:<eol>|$)/ (column == 1) => .skip(nil)
+    // condition == .directive /[^%]*(?=[\n\r%]|$)/ => .save(.directiveValue, .initial)
+    // condition == .field /[^%]*(?=[\n\r%]|$)/ => .save(.fieldValue, .initial)
 
     nonisolated(unsafe) private static let rules: [Rule] = [
-        Rule(regex: /%abc/,                             // MUST come before .comment
+        Rule(regex: regexFileID,
              validation: _locatedAtFirstColumn,
              disposition: .save(.fileID, nil)),
-        Rule(regex: regexDirectiveName,                 // MUST come before .comment
+        Rule(regex: regexDirectiveName,
              validation: _locatedAtFirstColumn,
-             disposition: .save(.directiveName, nil)),
-        Rule(regex: /[ \n\r\t]+/,
-             disposition: .skip(nil)),
-        Rule(regex: /%.*(?=[\n\r]|$)/,
-             disposition: .skip(nil)),
-        Rule(/[`]+/, .backquotes),
+             disposition: .save(.directiveName, .directive)),
+        Rule(/`+/, .backquotes),
         Rule(regexBarRepeat, .barRepeat),
         Rule(regexBrokenRhythmLeft, .brokenRhythmLeft),
         Rule(regexBrokenRhythmRight, .brokenRhythmRight),
         Rule(/\{/, .curlyBracketOpen),
         Rule(/\}/, .curlyBracketClose),
-        Rule(/-/, .dash),
         Rule(regexDecoration, .decoration),
         Rule(regexDirectiveValue, .directiveValue),
         Rule(regexFieldName, .fieldName),
@@ -83,10 +80,16 @@ extension ABCTokenizer {
         Rule(/\)/, .roundBracketClose),
         Rule(/\[/, .squareBracketOpen),
         Rule(/]/, .squareBracketClose),
-        Rule(regexVersion, .version)
     ]
 
     // MARK: Private Type Methods
+
+    private static func _locatedAfterFirstColumn(_ scanner: inout Scanner,
+                                                 _ value: Substring,
+                                                 _ location: Substring.Location,
+                                                 _ condition: Condition) throws -> Bool {
+        location.column > 1
+    }
 
     private static func _locatedAtFirstColumn(_ scanner: inout Scanner,
                                               _ value: Substring,
@@ -104,11 +107,11 @@ extension ABCTokenizer {
 
 // MARK: -
 
-// extension Tokenizer.Condition {
-//    internal static let comment     = Self("comment")
-//    internal static let parameter   = Self("parameter",
-//                                           isInclusive: true)
-// }
+extension Tokenizer.Condition {
+    internal static let directive   = Self("directive")
+    internal static let field       = Self("field")
+    internal static let inlineField = Self("inlineField")
+}
 
 // MARK: -
 
@@ -122,7 +125,6 @@ extension Tokenizer.Token.Kind {
     internal static let chordSymbol        = Self("chordSymbol")
     internal static let curlyBracketClose  = Self("curlyBracketClose")
     internal static let curlyBracketOpen   = Self("curlyBracketOpen")
-    internal static let dash               = Self("dash")
     internal static let decoration         = Self("decoration")
     internal static let directiveName      = Self("directiveName")
     internal static let directiveValue     = Self("directiveValue")
@@ -130,6 +132,10 @@ extension Tokenizer.Token.Kind {
     internal static let fieldValue         = Self("fieldValue")
     internal static let fileID             = Self("fileID")
     internal static let forwardSlash       = Self("forwardSlash")
+    internal static let inlineFieldClose   = Self("inlineFieldClose")
+    internal static let inlineFieldName    = Self("inlineFieldName")
+    internal static let inlineFieldOpen    = Self("inlineFieldOpen")
+    internal static let inlineFieldValue   = Self("inlineFieldValue")
     internal static let note               = Self("note")
     internal static let noteLength         = Self("noteLength")
     internal static let octave             = Self("octave")
@@ -137,5 +143,4 @@ extension Tokenizer.Token.Kind {
     internal static let roundBracketOpen   = Self("roundBracketOpen")
     internal static let squareBracketClose = Self("squareBracketClose")
     internal static let squareBracketOpen  = Self("squareBracketOpen")
-    internal static let version            = Self("version")
 }
